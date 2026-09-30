@@ -131,7 +131,7 @@ function Brands() {
 function BrandLogo({ inverted = false }: { inverted?: boolean }) {
   return (
     <img
-      src="/logo.png"
+      src="/LOGO.png"
       alt="Acullagsa Acumuladores y Llantas"
       className={`${inverted ? "h-12" : "h-12"} w-auto max-w-[240px] object-contain object-left`}
     />
