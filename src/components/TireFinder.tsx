@@ -81,7 +81,7 @@ export function TireFinder({ variant = "card", embedded = false }: { variant?: "
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
 
   const card = (
-      <div className={`overflow-hidden bg-background shadow-2xl ring-1 ring-border lg:grid lg:grid-cols-[1fr_280px] ${embedded ? "rounded-b-md rounded-t-none" : "rounded-md"}`}>
+      <div className={`overflow-hidden bg-background shadow-2xl ring-1 ring-border ${embedded ? "rounded-b-md rounded-t-none" : "rounded-md"}`}>
         <div className="p-5 md:p-7">
           {variant === "hero"
             ? <h1 className="text-xl font-black sm:text-2xl">Busca por medida o por vehículo</h1>
@@ -106,12 +106,12 @@ export function TireFinder({ variant = "card", embedded = false }: { variant?: "
               <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> Ver llantas {canSearch ? preview : ""}</Button>
             </div>
           )}
-        </div>
-        <div className="flex flex-col justify-center gap-5 bg-primary p-6 text-primary-foreground">
-          <div>
-            <p className="text-4xl font-black tracking-tight">{preview ? preview.replace("R", " R") : "—/— R—"}</p>
-            <p className="mt-2 text-sm font-bold">{mode === "vehicle" && vehicleSize ? `Medida de fábrica: ${make} ${model}` : "Elige ancho, perfil y rin."}</p>
-            <p className="mt-3 text-xs leading-5 text-primary-foreground/80">La medida viene en el costado de tu llanta, por ejemplo 205/55R16.</p>
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md bg-brand-soft px-4 py-3">
+            <p className="text-2xl font-black text-primary">{preview ? preview.replace("R", " R") : "—/— R—"}</p>
+            <div>
+              <p className="text-sm font-bold">{mode === "vehicle" && vehicleSize ? `Medida de fábrica: ${make} ${model}` : "Elige ancho, perfil y rin."}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">La medida viene en el costado de tu llanta, por ejemplo 205/55R16.</p>
+            </div>
           </div>
         </div>
       </div>
