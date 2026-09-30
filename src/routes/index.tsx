@@ -241,6 +241,9 @@ function CatalogHub() {
             <h2 className="mt-2 text-3xl font-black sm:text-4xl">Acumuladores LTH®</h2>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Una solución para cada vehículo, respaldada por asesoría especializada.</p>
           </div>
+          <div className="mt-6">
+            <ProductFinder category="acumuladores" />
+          </div>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {batteries.map((item) => (
               <article key={item.name} className="group overflow-hidden rounded-md border border-border bg-card transition-shadow hover:shadow-xl">
@@ -254,9 +257,6 @@ function CatalogHub() {
                 </div>
               </article>
             ))}
-          </div>
-          <div className="mt-10">
-            <ProductFinder category="acumuladores" />
           </div>
         </div>
       )}
