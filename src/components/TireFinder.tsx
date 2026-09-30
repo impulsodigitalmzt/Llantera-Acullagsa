@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { CarFront, Ruler, Search, MessageCircle, SlidersHorizontal, Wrench, Truck, Phone } from "lucide-react";
+lisimport { CarFront, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import tireImg from "@/assets/tire.jpg";
+import type { CartItem } from "@/components/ShoppingCart";
 
 type Tire = { brand: string; model: string; size: string; load: string; price: number; list: number; stock: boolean };
 
@@ -44,7 +45,11 @@ const parse = (s: string) => { const [w = "", rest = ""] = s.split("/"); const [
 const uniq = (a: string[]) => [...new Set(a)].sort((x, y) => Number(x) - Number(y));
 const money = (n: number) => `$ ${n.toLocaleString("es-MX")}.00`;
 
-export function TireFinder({ variant = "card", embedded = false }: { variant?: "hero" | "card"; embedded?: boolean }) {
+export function TireFinder({ variant = "card", embedded = false, onAddToCart }: {
+  variant?: "hero" | "card";
+  embedded?: boolean;
+  onAddToCart: (item: Omit<CartItem, "quantity">) => void;
+}) {
   const [mode, setMode] = useState<"size" | "vehicle">("size");
   const [w, setW] = useState(""); const [p, setP] = useState(""); const [r, setR] = useState("");
   const [make, setMake] = useState(""); const [model, setModel] = useState(""); const [year, setYear] = useState("");
@@ -136,7 +141,6 @@ export function TireFinder({ variant = "card", embedded = false }: { variant?: "
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {shown.map((t) => {
                 const off = Math.round((1 - t.price / t.list) * 100);
-                const msg = encodeURIComponent(`Hola, me interesa la llanta ${t.brand} ${t.model} ${t.size} (${money(t.price)}).`);
                 return <article key={t.brand + t.model} className="flex flex-col rounded-md border border-border bg-background p-4 text-center transition-shadow hover:shadow-lg">
                   <div className="relative"><span className="absolute left-0 top-0 rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
                     <p className="text-xs font-black italic text-primary">{t.brand}</p>
@@ -146,7 +150,14 @@ export function TireFinder({ variant = "card", embedded = false }: { variant?: "
                   <p className="mt-2 text-sm text-muted-foreground line-through">{money(t.list)}</p>
                   <p className="text-xl font-black text-primary">{money(t.price)}</p>
                   <p className={`mt-1 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
-                  <Button asChild variant="dark" className="mt-4"><a href={`https://wa.me/526699402253?text=${msg}`} target="_blank" rel="noreferrer"><MessageCircle /> Cotizar</a></Button>
+                  <Button variant="dark" className="mt-4" onClick={() => onAddToCart({
+                    id: `tire-${t.brand}-${t.model}-${t.size}`,
+                    name: `${t.brand} ${t.model}`,
+                    category: "Llanta",
+                    detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`,
+                    price: t.price,
+                    image: tireImg,
+                  })}><ShoppingCart /> {t.stock ? "Agregar al carrito" : "Agregar por pedido"}</Button>
                 </article>;
               })}
             </div>

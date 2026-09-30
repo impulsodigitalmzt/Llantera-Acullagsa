@@ -10,6 +10,7 @@ import {
   Menu,
   MessageCircle,
   Phone,
+  ShoppingCart as ShoppingCartIcon,
   ShieldCheck,
   Sparkles,
   Truck,
@@ -20,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TireFinder } from "@/components/TireFinder";
 import { ProductFinder } from "@/components/ProductFinder";
+import { ShoppingCart, type CartItem } from "@/components/ShoppingCart";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -128,7 +130,7 @@ function BrandLogo({ inverted = false }: { inverted?: boolean }) {
   );
 }
 
-function Header() {
+function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () => void }) {
   const [open, setOpen] = useState(false);
   return <>
     <div className="bg-brand-ink text-primary-foreground">
@@ -146,6 +148,11 @@ function Header() {
           {nav.map(([label, href]) => <a key={href} href={href} className="text-xs font-bold uppercase text-foreground transition-colors hover:text-primary">{label}</a>)}
         </nav>
         <div className="flex items-center gap-2">
+          <Button variant="outline" aria-label={`Abrir carrito, ${cartCount} artículos`} className="relative gap-2 px-3" onClick={onOpenCart}>
+            <ShoppingCartIcon className="size-4" />
+            <span className="hidden sm:inline">Carrito</span>
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground">{cartCount}</span>
+          </Button>
           <Button asChild variant="hero" className="hidden sm:inline-flex"><a href="https://wa.me/526699402253" target="_blank" rel="noreferrer"><MessageCircle /> Cotizar</a></Button>
           <Button variant="ghost" size="icon" aria-label={open ? "Cerrar menú" : "Abrir menú"} className="lg:hidden" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</Button>
         </div>
@@ -155,7 +162,7 @@ function Header() {
   </>;
 }
 
-function CatalogHub() {
+function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quantity">) => void }) {
   const [tab, setTab] = useState<CatalogTab>("llantas");
 
   useEffect(() => {
@@ -217,7 +224,7 @@ function CatalogHub() {
 
       {tab === "llantas" && (
         <div role="tabpanel" id="panel-llantas" aria-labelledby="tab-llantas">
-          <TireFinder variant="hero" embedded />
+          <TireFinder variant="hero" embedded onAddToCart={onAddToCart} />
         </div>
       )}
 
@@ -234,7 +241,7 @@ function CatalogHub() {
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Una solución para cada vehículo, respaldada por asesoría especializada.</p>
           </div>
           <div className="mt-6">
-            <ProductFinder category="acumuladores" />
+            <ProductFinder category="acumuladores" onAddToCart={onAddToCart} />
           </div>
         </div>
       )}
@@ -252,7 +259,7 @@ function CatalogHub() {
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.</p>
           </div>
           <div className="mt-8">
-            <ProductFinder category="amortiguadores" />
+            <ProductFinder category="amortiguadores" onAddToCart={onAddToCart} />
           </div>
         </div>
       )}
@@ -261,16 +268,63 @@ function CatalogHub() {
 }
 
 function Index() {
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = window.localStorage.getItem("acullagsa-cart-v1");
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item): item is CartItem =>
+        item !== null &&
+        typeof item === "object" &&
+        typeof item.id === "string" &&
+        typeof item.name === "string" &&
+        typeof item.category === "string" &&
+        typeof item.detail === "string" &&
+        typeof item.price === "number" &&
+        typeof item.quantity === "number",
+      );
+    } catch {
+      return [];
+    }
+  });
+  const [cartOpen, setCartOpen] = useState(false);
+  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("acullagsa-cart-v1", JSON.stringify(cartItems));
+    } catch {
+      return;
+    }
+  }, [cartItems]);
+
+  const addToCart = (product: Omit<CartItem, "quantity">) => {
+    setCartItems((items) => {
+      const existing = items.find((item) => item.id === product.id);
+      return existing
+        ? items.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+        : [...items, { ...product, quantity: 1 }];
+    });
+    setCartOpen(true);
+  };
+
+  const updateCartQuantity = (id: string, quantity: number) => {
+    setCartItems((items) => quantity < 1
+      ? items.filter((item) => item.id !== id)
+      : items.map((item) => item.id === id ? { ...item, quantity } : item));
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header />
+      <Header cartCount={cartCount} onOpenCart={() => setCartOpen(true)} />
       <main>
         <section id="inicio" className="relative overflow-hidden bg-brand-ink">
           <img src="https://via.placeholder.com/1600x900?text=Hero" width={1600} height={900} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover object-[66%_center] opacity-25" />
           <div className="absolute inset-0 bg-hero-overlay" />
           <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-14" />
         </section>
-        <CatalogHub />
+        <CatalogHub onAddToCart={addToCart} />
 
         <section id="servicios" className="bg-brand-ink py-20 text-primary-foreground"><div className="mx-auto max-w-6xl px-4"><div className="max-w-3xl"><p className="text-xs font-bold uppercase text-primary">Centro de servicio LTH</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">No solo vendemos.<br/>Te ponemos en marcha.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-primary-foreground/70">Contamos con equipo y personal capacitado para diagnosticar, instalar y cuidar tu vehículo con procesos confiables.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{serviceItems.map(([Icon, label]) => <div key={label} className="flex items-center gap-3 border-b border-primary-foreground/15 pb-4 text-sm font-bold"><Icon className="size-5 text-primary" />{label}</div>)}</div><Button asChild size="xl" variant="hero" className="mt-8"><a href="tel:6699855424"><Phone /> Cotizar servicio</a></Button></div></div></section>
 
@@ -306,6 +360,14 @@ function Index() {
         <div className="mx-auto mt-10 max-w-6xl border-t border-primary-foreground/10 px-4 pt-6 text-[11px] text-primary-foreground/40">© 2026 Acullagsa. Todos los derechos reservados.</div>
       </footer>
       <a href="https://wa.me/526699402253" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp" className="fixed bottom-5 right-5 z-50 flex size-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105"><MessageCircle className="size-6" /></a>
+      <ShoppingCart
+        items={cartItems}
+        open={cartOpen}
+        onOpenChange={setCartOpen}
+        onUpdateQuantity={updateCartQuantity}
+        onRemove={(id) => setCartItems((items) => items.filter((item) => item.id !== id))}
+        onClear={() => setCartItems([])}
+      />
     </div>
   );
 }

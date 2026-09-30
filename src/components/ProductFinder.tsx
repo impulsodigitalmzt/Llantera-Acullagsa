@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { BatteryCharging, CarFront, CircleDot, MessageCircle, Search } from "lucide-react";
+import { BatteryCharging, CircleDot, Search, ShoppingCart, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BATTERY_CATALOG, VEHICLES, YEARS, money, shocksForVehicle } from "@/data/catalog";
+import type { CartItem } from "@/components/ShoppingCart";
 
 type Category = "acumuladores" | "amortiguadores";
 
@@ -32,7 +33,10 @@ const CONFIG: Record<Category, {
   },
 };
 
-export function ProductFinder({ category }: { category: Category }) {
+export function ProductFinder({ category, onAddToCart }: {
+  category: Category;
+  onAddToCart: (item: Omit<CartItem, "quantity">) => void;
+}) {
   const cfg = CONFIG[category];
   const Icon = cfg.icon;
   const [make, setMake] = useState("");
@@ -84,7 +88,6 @@ export function ProductFinder({ category }: { category: Category }) {
         <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {batteries.map((b) => {
             const off = Math.round((1 - b.price / b.list) * 100);
-            const msg = encodeURIComponent(`Hola, me interesa el acumulador ${b.brand} ${b.line} grupo ${b.group} para mi ${result.make} ${result.model} ${result.year} (${money(b.price)}).`);
             return <article key={b.line} className="flex flex-col rounded-md border border-border bg-background p-5 transition-shadow hover:shadow-lg">
               <div className="mb-4 flex aspect-[3/2] items-center justify-center rounded-md bg-brand-soft p-3">
                 <img src={`/acumuladores/${BATTERY_IMAGES[b.line]}`} alt={`${b.brand} ${b.line}`} loading="lazy" className="size-full object-contain" />
@@ -99,7 +102,14 @@ export function ProductFinder({ category }: { category: Category }) {
               <p className="mt-3 text-sm text-muted-foreground line-through">{money(b.list)}</p>
               <p className="text-xl font-black text-primary">{money(b.price)}</p>
               <p className={`mt-1 text-xs font-semibold ${b.stock ? "text-foreground" : "text-muted-foreground"}`}>{b.stock ? "En existencia" : "Sobre pedido"}</p>
-              <Button asChild variant="dark" className="mt-4"><a href={`https://wa.me/526699402253?text=${msg}`} target="_blank" rel="noreferrer"><MessageCircle /> Cotizar</a></Button>
+              <Button variant="dark" className="mt-4" onClick={() => onAddToCart({
+                id: `battery-${b.group}-${b.line}`,
+                name: `${b.brand} ${b.line}`,
+                category: "Acumulador",
+                detail: `Grupo ${b.group} · ${b.cca} CCA · ${result.make} ${result.model} ${result.year} · ${b.stock ? "En existencia" : "Sobre pedido"}`,
+                price: b.price,
+                image: `/acumuladores/${BATTERY_IMAGES[b.line]}`,
+              })}><ShoppingCart /> {b.stock ? "Agregar al carrito" : "Agregar por pedido"}</Button>
             </article>;
           })}
         </div>
@@ -113,8 +123,10 @@ export function ProductFinder({ category }: { category: Category }) {
         <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {shocks.map((s) => {
             const off = Math.round((1 - s.price / s.list) * 100);
-            const msg = encodeURIComponent(`Hola, me interesa el amortiguador ${s.brand} ${s.model} ${s.position.toLowerCase()} para mi ${result.make} ${result.model} ${result.year} (${money(s.price)}).`);
             return <article key={s.brand + s.position} className="flex flex-col rounded-md border border-border bg-background p-5 transition-shadow hover:shadow-lg">
+              <div className="mb-4 flex aspect-[3/2] items-center justify-center rounded-md bg-brand-soft">
+                <Wrench className="size-14 text-primary" />
+              </div>
               <div className="flex items-start justify-between">
                 <p className="text-xs font-black italic text-primary">{s.brand}</p>
                 <span className="rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
@@ -124,7 +136,13 @@ export function ProductFinder({ category }: { category: Category }) {
               <p className="mt-3 text-sm text-muted-foreground line-through">{money(s.list)}</p>
               <p className="text-xl font-black text-primary">{money(s.price)}</p>
               <p className={`mt-1 text-xs font-semibold ${s.stock ? "text-foreground" : "text-muted-foreground"}`}>{s.stock ? "En existencia" : "Sobre pedido"}</p>
-              <Button asChild variant="dark" className="mt-4"><a href={`https://wa.me/526699402253?text=${msg}`} target="_blank" rel="noreferrer"><MessageCircle /> Cotizar</a></Button>
+              <Button variant="dark" className="mt-4" onClick={() => onAddToCart({
+                id: `shock-${result.make}-${result.model}-${s.brand}-${s.position}`,
+                name: `${s.brand} ${s.model}`,
+                category: "Amortiguador",
+                detail: `${s.position} · ${result.make} ${result.model} ${result.year} · ${s.stock ? "En existencia" : "Sobre pedido"}`,
+                price: s.price,
+              })}><ShoppingCart /> {s.stock ? "Agregar al carrito" : "Agregar por pedido"}</Button>
             </article>;
           })}
         </div>
