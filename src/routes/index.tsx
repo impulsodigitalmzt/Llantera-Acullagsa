@@ -82,19 +82,19 @@ const benefits: Array<[LucideIcon, string, string]> = [
 ];
 
 const lthLines = [
-  "El alma de tu automóvil",
-  "Lubricantes",
-  "Moto-Batería",
-  "Filtros",
+  { name: "El alma de tu automóvil", image: "lth-auto.png" },
+  { name: "Lubricantes", image: "lth-lub.png" },
+  { name: "Moto-Batería", image: "lth-moto.png" },
+  { name: "Filtros", image: "lth-filtro.png" },
 ];
 
-const tireBrands: Array<{ name: string; sub?: string; color: string; subColor?: string }> = [
-  { name: "GOOD YEAR", color: "#002D62" },
-  { name: "TORNEL", color: "#000000" },
-  { name: "JK TYRE", sub: "TOTAL CONTROL", color: "#000000", subColor: "#C8102E" },
-  { name: "VIKRANT", color: "#808080", subColor: "#F07D00" },
-  { name: "PACE", sub: "TYRES", color: "#E37222" },
-  { name: "TOLEDO", sub: "TYRES", color: "#005CB9" },
+const tireBrands = [
+  { name: "GOOD YEAR", image: "goodyear.png" },
+  { name: "TORNEL", image: "tornel.png" },
+  { name: "JK TYRE", image: "jktyre.png" },
+  { name: "VIKRANT", image: "vikrant.png" },
+  { name: "PACE", image: "pace.png" },
+  { name: "TOLEDO", image: "toledo.png" },
 ];
 
 function Brands() {
@@ -108,18 +108,16 @@ function Brands() {
           <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">Opciones para autos, camionetas, camiones y vehículos agrícolas. Te asesoramos para encontrar la medida adecuada.</p>
         </div>
         <div className="mt-10 grid gap-px overflow-hidden rounded-md bg-border sm:grid-cols-2 lg:grid-cols-4">
-          {lthLines.map((sub) => (
-            <div key={sub} className="flex min-h-32 flex-col items-center justify-center gap-1.5 bg-background p-6 text-center">
-              <span className="text-4xl font-black italic leading-none" style={{ color: "#C8102E" }}>LTH</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#0046AD" }}>{sub}</span>
+          {lthLines.map((item) => (
+            <div key={item.name} className="flex min-h-32 items-center justify-center bg-background p-6">
+              <img src={`/marcas/${item.image}`} alt={`LTH ${item.name}`} loading="lazy" className="h-16 w-full object-contain" />
             </div>
           ))}
         </div>
         <div className="mt-px grid gap-px overflow-hidden rounded-md bg-border sm:grid-cols-2 lg:grid-cols-6">
           {tireBrands.map((b) => (
-            <div key={b.name} className="flex min-h-32 flex-col items-center justify-center gap-1 bg-background p-4 text-center">
-              <span className="text-2xl font-black italic leading-none" style={{ color: b.color }}>{b.name}</span>
-              {b.sub && <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: b.subColor ?? b.color }}>{b.sub}</span>}
+            <div key={b.name} className="flex min-h-32 items-center justify-center bg-background p-4">
+              <img src={`/marcas/${b.image}`} alt={b.name} loading="lazy" className="h-16 w-full object-contain" />
             </div>
           ))}
         </div>
