@@ -75,7 +75,9 @@ export function TireFinder({ variant = "card", embedded = false }: { variant?: "
     .filter((t) => !onlyStock || t.stock)
     .sort((a, b) => sort === "asc" ? a.price - b.price : b.price - a.price), [matches, brandFilter, onlyStock, sort]);
 
-  const sel = "mt-2 h-12 w-full rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
+  const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
+  const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
+  const formGrid = "mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
 
   const card = (
@@ -90,18 +92,18 @@ export function TireFinder({ variant = "card", embedded = false }: { variant?: "
             <button className={tab(mode === "vehicle")} onClick={() => setMode("vehicle")}><CarFront className="size-4" /> Por vehículo</button>
           </div>
           {mode === "size" ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
-              <label className="text-xs font-bold">Ancho<select className={sel} value={w} onChange={(e) => { setW(e.target.value); setP(""); setR(""); }}><option value="">Ancho</option>{widths.map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className="text-xs font-bold">Perfil<select className={sel} disabled={!w} value={p} onChange={(e) => { setP(e.target.value); setR(""); }}><option value="">Perfil</option>{profiles.map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className="text-xs font-bold">Rin<select className={sel} disabled={!p} value={r} onChange={(e) => setR(e.target.value)}><option value="">Rin</option>{rins.map((x) => <option key={x} value={x}>R{x}</option>)}</select></label>
-              <Button size="xl" variant="hero" disabled={!canSearch} className="self-end" onClick={search}><Search /> Ver llantas</Button>
+            <div className={formGrid}>
+              <label className={field}>Ancho<select className={sel} value={w} onChange={(e) => { setW(e.target.value); setP(""); setR(""); }}><option value="">Ancho</option>{widths.map((x) => <option key={x}>{x}</option>)}</select></label>
+              <label className={field}>Perfil<select className={sel} disabled={!w} value={p} onChange={(e) => { setP(e.target.value); setR(""); }}><option value="">Perfil</option>{profiles.map((x) => <option key={x}>{x}</option>)}</select></label>
+              <label className={field}>Rin<select className={sel} disabled={!p} value={r} onChange={(e) => setR(e.target.value)}><option value="">Rin</option>{rins.map((x) => <option key={x} value={x}>R{x}</option>)}</select></label>
+              <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> Ver llantas</Button>
             </div>
           ) : (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
-              <label className="text-xs font-bold">Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className="text-xs font-bold">Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className="text-xs font-bold">Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
-              <Button size="xl" variant="hero" disabled={!canSearch} className="self-end" onClick={search}><Search /> Ver llantas {canSearch ? preview : ""}</Button>
+            <div className={formGrid}>
+              <label className={field}>Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
+              <label className={field}>Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
+              <label className={field}>Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
+              <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> Ver llantas {canSearch ? preview : ""}</Button>
             </div>
           )}
         </div>

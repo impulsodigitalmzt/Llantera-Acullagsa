@@ -52,18 +52,20 @@ export function ProductFinder({ category }: { category: Category }) {
     [category, result],
   );
 
-  const sel = "mt-2 h-12 w-full rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
+  const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
+  const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
+  const formGrid = "mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
 
   return <>
     <div className="overflow-hidden rounded-md bg-background shadow-xl ring-1 ring-border">
       <div className="p-5 md:p-7">
         <h3 className="flex items-center gap-2 text-xl font-black sm:text-2xl"><Icon className="size-6 text-primary" /> {cfg.title}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{cfg.subtitle}</p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
-          <label className="text-xs font-bold">Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
-          <label className="text-xs font-bold">Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
-          <label className="text-xs font-bold">Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
-          <Button size="xl" variant="hero" disabled={!canSearch} className="self-end" onClick={search}><Search /> {cfg.button}</Button>
+        <div className={formGrid}>
+          <label className={field}>Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className={field}>Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
+          <label className={field}>Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
+          <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> {cfg.button}</Button>
         </div>
       </div>
     </div>
