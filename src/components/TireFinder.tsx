@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-lisimport { CarFront, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
+import { CarFront, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import tireImg from "@/assets/tire.jpg";
 import type { CartItem } from "@/components/ShoppingCart";
