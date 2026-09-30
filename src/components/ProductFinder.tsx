@@ -5,6 +5,13 @@ import { BATTERY_CATALOG, VEHICLES, YEARS, money, shocksForVehicle } from "@/dat
 
 type Category = "acumuladores" | "amortiguadores";
 
+const BATTERY_IMAGES: Record<string, string> = {
+  Automotriz: "LTH-Automotriz-2019-300x192.jpg",
+  "HI-TEC": "LTH-HITEC-2019-300x192.jpg",
+  AGM: "Foto-LTH-AGM-Auto-2016-1-300x192.jpg",
+  "Heavy Duty": "LTH-HEAVY-DUTY-2019-300x192.jpg",
+};
+
 const CONFIG: Record<Category, {
   title: string;
   subtitle: string;
@@ -79,6 +86,9 @@ export function ProductFinder({ category }: { category: Category }) {
             const off = Math.round((1 - b.price / b.list) * 100);
             const msg = encodeURIComponent(`Hola, me interesa el acumulador ${b.brand} ${b.line} grupo ${b.group} para mi ${result.make} ${result.model} ${result.year} (${money(b.price)}).`);
             return <article key={b.line} className="flex flex-col rounded-md border border-border bg-background p-5 transition-shadow hover:shadow-lg">
+              <div className="mb-4 flex aspect-[3/2] items-center justify-center rounded-md bg-brand-soft p-3">
+                <img src={`/acumuladores/${BATTERY_IMAGES[b.line]}`} alt={`${b.brand} ${b.line}`} loading="lazy" className="size-full object-contain" />
+              </div>
               <div className="flex items-start justify-between">
                 <p className="text-xs font-black italic text-primary">{b.brand}</p>
                 <span className="rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
