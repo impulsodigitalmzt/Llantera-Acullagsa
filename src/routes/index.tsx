@@ -35,14 +35,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const batteries = [
-  { name: "LTH Automotriz", use: "Autos de uso diario", image: "/acumuladores/LTH-Automotriz-2019-300x192.jpg", tag: "Más buscada" },
-  { name: "LTH HI-TECH", use: "Vehículos recientes y equipados", image: "/acumuladores/LTH-HITEC-2019-300x192.jpg", tag: "Alto desempeño" },
-  { name: "LTH Heavy Duty", use: "Trabajo pesado y condiciones extremas", image: "/acumuladores/LTH-HEAVY-DUTY-2019-300x192.jpg", tag: "Uso rudo" },
-  { name: "LTH AGM", use: "Alta demanda eléctrica", image: "/acumuladores/Foto-LTH-AGM-Auto-2016-1-300x192.jpg", tag: "Tecnología avanzada" },
-  { name: "LTH SUV · VAN", use: "Potencia adicional y máxima seguridad", image: "/acumuladores/LTH-SUV-Front-2019-300x192.jpg", tag: "Camionetas" },
-];
-
 const nav = [
   ["Inicio", "#inicio"], ["Llantas", "#llantas"], ["Acumuladores", "#acumuladores"],
   ["Amortiguadores", "#amortiguadores"], ["Servicios", "#servicios"], ["Contacto", "#contacto"],
@@ -243,20 +235,6 @@ function CatalogHub() {
           </div>
           <div className="mt-6">
             <ProductFinder category="acumuladores" />
-          </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-            {batteries.map((item) => (
-              <article key={item.name} className="group overflow-hidden rounded-md border border-border bg-card transition-shadow hover:shadow-xl">
-                <div className="relative aspect-[4/3] bg-brand-soft p-4">
-                  <span className="absolute left-3 top-3 z-10 rounded-sm bg-brand-ink px-2 py-1 text-[10px] font-bold uppercase text-primary-foreground">{item.tag}</span>
-                  <img src={item.image} width={300} height={192} loading="lazy" alt={item.name} className="size-full object-contain transition-transform group-hover:scale-105" />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-black">{item.name}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.use}</p>
-                </div>
-              </article>
-            ))}
           </div>
         </div>
       )}
