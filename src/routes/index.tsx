@@ -36,11 +36,11 @@ export const Route = createFileRoute("/")({
 });
 
 const batteries = [
-  { name: "LTH Automotriz", use: "Autos de uso diario", image: "https://via.placeholder.com/800x600?text=Automotriz", tag: "Más buscada" },
-  { name: "LTH HI-TECH", use: "Vehículos recientes y equipados", image: "https://via.placeholder.com/800x600?text=HiTech", tag: "Alto desempeño" },
-  { name: "LTH Heavy Duty", use: "Trabajo pesado y condiciones extremas", image: "https://via.placeholder.com/800x600?text=Heavy", tag: "Uso rudo" },
-  { name: "LTH AGM", use: "Alta demanda eléctrica", image: "https://via.placeholder.com/800x600?text=AGM", tag: "Tecnología avanzada" },
-  { name: "LTH SUV · VAN", use: "Potencia adicional y máxima seguridad", image: "https://via.placeholder.com/800x600?text=SUV", tag: "Camionetas" },
+  { name: "LTH Automotriz", use: "Autos de uso diario", image: "/acumuladores/LTH-Automotriz-2019-300x192.jpg", tag: "Más buscada" },
+  { name: "LTH HI-TECH", use: "Vehículos recientes y equipados", image: "/acumuladores/LTH-HITEC-2019-300x192.jpg", tag: "Alto desempeño" },
+  { name: "LTH Heavy Duty", use: "Trabajo pesado y condiciones extremas", image: "/acumuladores/LTH-HEAVY-DUTY-2019-300x192.jpg", tag: "Uso rudo" },
+  { name: "LTH AGM", use: "Alta demanda eléctrica", image: "/acumuladores/Foto-LTH-AGM-Auto-2016-1-300x192.jpg", tag: "Tecnología avanzada" },
+  { name: "LTH SUV · VAN", use: "Potencia adicional y máxima seguridad", image: "/acumuladores/LTH-SUV-Front-2019-300x192.jpg", tag: "Camionetas" },
 ];
 
 const nav = [
