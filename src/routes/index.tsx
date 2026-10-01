@@ -6,6 +6,7 @@ import {
   CircleDot,
   Clock3,
   Headphones,
+  House,
   MapPin,
   Menu,
   MessageCircle,
@@ -38,10 +39,19 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const nav = [
+const nav: Array<[string, string]> = [
   ["Inicio", "#inicio"], ["Llantas", "#llantas"], ["Acumuladores", "#acumuladores"],
   ["Amortiguadores", "#amortiguadores"], ["Servicios", "#servicios"], ["Sucursales", "#sucursales"],
 ];
+
+const navIcons: Record<string, LucideIcon> = {
+  "#inicio": House,
+  "#llantas": CircleDot,
+  "#acumuladores": BatteryCharging,
+  "#amortiguadores": Wrench,
+  "#servicios": Sparkles,
+  "#sucursales": MapPin,
+};
 
 type CatalogTab = "llantas" | "acumuladores" | "amortiguadores";
 
@@ -242,7 +252,10 @@ function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
           <Button variant="ghost" size="icon" aria-label={open ? "Cerrar menú" : "Abrir menú"} className="lg:hidden" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</Button>
         </div>
       </div>
-      {open && <nav className="border-t border-border bg-background px-4 py-3 lg:hidden">{nav.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="block border-b border-border py-3 text-sm font-bold uppercase last:border-0">{label}</a>)}</nav>}
+      {open && <nav className="border-t border-border bg-background px-4 py-3 lg:hidden" aria-label="Navegación móvil">{nav.map(([label, href]) => {
+        const Icon = (href && navIcons[href]) || House;
+        return <a key={href} href={href} onClick={() => setOpen(false)} className="flex items-center gap-3 border-b border-border py-3 text-sm font-bold uppercase last:border-0"><Icon className="size-4 shrink-0 text-primary" aria-hidden="true" />{label}</a>;
+      })}</nav>}
     </header>
   </>;
 }
