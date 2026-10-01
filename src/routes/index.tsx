@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BatteryCharging,
   CarFront,
@@ -279,20 +279,32 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
   onOpenProduct: (product: ProductDetailProduct, products: ProductDetailProduct[]) => void;
 }) {
   const [tab, setTab] = useState<CatalogTab>("llantas");
-  const scrollToPanel = (id: CatalogTab) => {
+  const tablistRef = useRef<HTMLDivElement | null>(null);
+  const pendingScrollRef = useRef<CatalogTab | null>(null);
+  const scrollToPanel = useCallback((id: CatalogTab) => {
     window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        document.getElementById(`panel-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      const panel = document.getElementById(`panel-${id}`);
+      const tablist = tablistRef.current;
+      if (!panel || !tablist) return;
+      const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+      const fixedHeight = headerHeight + tablist.getBoundingClientRect().height;
+      const top = window.scrollY + panel.getBoundingClientRect().top - fixedHeight;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    if (pendingScrollRef.current !== tab) return;
+    pendingScrollRef.current = null;
+    scrollToPanel(tab);
+  }, [scrollToPanel, tab]);
 
   useEffect(() => {
     const applyHash = () => {
       const next = hashToTab(window.location.hash);
       if (next) {
+        pendingScrollRef.current = next;
         setTab(next);
-        scrollToPanel(next);
       }
     };
     applyHash();
@@ -301,8 +313,12 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
   }, []);
 
   const selectTab = (id: CatalogTab) => {
-    setTab(id);
-    scrollToPanel(id);
+    if (id === tab) {
+      scrollToPanel(id);
+    } else {
+      pendingScrollRef.current = id;
+      setTab(id);
+    }
     const hash = `#${id}`;
     if (window.location.hash !== hash) {
       history.replaceState(null, "", hash);
@@ -318,6 +334,7 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
       <span id="inicio" className="sr-only">Inicio</span>
 
       <div
+        ref={tablistRef}
         role="tablist"
         aria-label="Categorías de producto"
         className="sticky top-20 z-30 grid grid-cols-3 overflow-hidden rounded-t-md bg-brand-ink shadow-2xl ring-1 ring-border"
