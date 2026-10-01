@@ -209,7 +209,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
         <div className="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div><p className="text-xs font-bold uppercase text-primary">{result.label}</p><h2 className="mt-1 text-2xl font-black sm:text-3xl">Llantas {result.size}</h2></div>
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">{shown.length} de {matches.length} productos</span>
-            <label className="flex items-center gap-2 font-semibold">Ordenar por<select aria-label="Ordenar productos" value={sort} onChange={(e) => setSort(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3"><option value="relevance">Relevancia</option><option value="asc">Precio, menor a mayor</option><option value="desc">Precio, mayor a menor</option></select></label></div>
+            <label className="hidden items-center gap-2 font-semibold lg:flex">Ordenar por<select aria-label="Ordenar productos" value={sort} onChange={(e) => setSort(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3"><option value="relevance">Relevancia</option><option value="asc">Precio, menor a mayor</option><option value="desc">Precio, mayor a menor</option></select></label></div>
         </div>
         <div className="mt-4 lg:mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
           <aside className="hidden lg:block lg:rounded-xl lg:border lg:border-border lg:bg-muted/20 lg:p-3 lg:text-sm lg:shadow-sm lg:pr-6">
@@ -244,6 +244,10 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
             {isFilterOpen && (
               <div className="mb-4 rounded-xl border border-border bg-muted/20 p-3 shadow-sm">
                 <div className="space-y-3">
+                  <div>
+                    <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Ordenar por</p>
+                    <select aria-label="Ordenar productos" value={sort} onChange={(e) => setSort(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="relevance">Relevancia</option><option value="asc">Precio, menor a mayor</option><option value="desc">Precio, mayor a menor</option></select>
+                  </div>
                   <div>
                     <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Disponibilidad</p>
                     <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={onlyStock} onChange={(e) => setOnlyStock(e.target.checked)} className="accent-primary" /> En existencia <span className="ml-auto text-xs text-muted-foreground">{matches.filter((t) => t.stock).length}</span></label>
