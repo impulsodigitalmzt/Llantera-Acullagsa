@@ -393,7 +393,14 @@ function Index() {
   }, [cartItems]);
 
   useEffect(() => {
-    const updateBranchVisibility = () => setShowBranches(window.location.hash === "#sucursales");
+    const updateBranchVisibility = () => {
+      const isBranchesPage = window.location.hash === "#sucursales";
+      setShowBranches(isBranchesPage);
+      if (isBranchesPage) {
+        setProductSelection(null);
+        setCartOpen(false);
+      }
+    };
     window.addEventListener("hashchange", updateBranchVisibility);
     return () => window.removeEventListener("hashchange", updateBranchVisibility);
   }, []);
@@ -434,15 +441,13 @@ function Index() {
     <div className="min-h-screen bg-background text-foreground">
       <Header cartCount={cartCount} onOpenCart={() => setCartOpen(true)} />
       <main>
-        <div className={productSelection ? "hidden" : undefined}>
+        {productSelection ? null : showBranches ? <Branches /> : <>
           <section id="inicio" className="relative overflow-hidden bg-brand-ink">
             <img src="https://via.placeholder.com/1600x900?text=Hero" width={1600} height={900} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover object-[66%_center] opacity-25" />
             <div className="absolute inset-0 bg-hero-overlay" />
             <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-14" />
           </section>
           <CatalogHub onAddToCart={addToCart} onOpenProduct={openProduct} />
-
-          {showBranches && <Branches />}
 
           <section id="servicios" className="bg-brand-ink py-20 text-primary-foreground"><div className="mx-auto max-w-6xl px-4"><div className="max-w-3xl"><p className="text-xs font-bold uppercase text-primary">Centro de servicio LTH</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">No solo vendemos.<br/>Te ponemos en marcha.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-primary-foreground/70">Contamos con equipo y personal capacitado para diagnosticar, instalar y cuidar tu vehículo con procesos confiables.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{serviceItems.map(([Icon, label]) => <div key={label} className="flex items-center gap-3 border-b border-primary-foreground/15 pb-4 text-sm font-bold"><Icon className="size-5 text-primary" />{label}</div>)}</div><Button asChild size="xl" variant="hero" className="mt-8"><a href="tel:6699855424"><Phone /> Cotizar servicio</a></Button></div></div></section>
 
@@ -451,10 +456,10 @@ function Index() {
           <section id="nosotros" className="mx-auto max-w-6xl px-4 py-20"><div className="text-center"><p className="text-xs font-bold uppercase text-primary">¿Por qué Acullagsa?</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Confianza que sí responde.</h2></div><div className="mt-12 grid gap-8 md:grid-cols-3">{benefits.map(([Icon,title,text]) => <div key={title} className="border-t-2 border-primary pt-6"><Icon className="size-9 text-primary" /><h3 className="mt-5 text-lg font-black">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{text}</p></div>)}</div></section>
 
           <section id="contacto" className="bg-primary py-14 text-primary-foreground"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 md:flex-row md:items-center"><div><p className="text-xs font-bold uppercase">Atención rápida en Mazatlán</p><h2 className="mt-2 text-3xl font-black">¿Tu vehículo no enciende?</h2><p className="mt-2 text-sm text-primary-foreground/80">Escríbenos y te ayudamos a encontrar la batería correcta.</p></div><div className="flex flex-wrap gap-3"><Button asChild size="xl" variant="dark"><a href="https://wa.me/526699402253" target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button><Button asChild size="xl" variant="heroOutline"><a href="tel:6699404388"><Phone /> 669 940 4388</a></Button></div></div></section>
-        </div>
+        </>}
         {productSelection && <ProductDetailPage product={productSelection.product} products={productSelection.products} onBack={closeProduct} onSelectProduct={(product) => setProductSelection((selection) => selection ? { ...selection, product } : selection)} onAddToCart={addToCart} />}
       </main>
-      {!productSelection && <footer className="bg-brand-ink py-12 text-primary-foreground">
+      {!productSelection && !showBranches && <footer className="bg-brand-ink py-12 text-primary-foreground">
         <div className="mx-auto grid max-w-6xl gap-9 px-4 md:grid-cols-[1.2fr_1fr_1fr]">
           <div>
             <BrandLogo inverted />
@@ -479,7 +484,7 @@ function Index() {
         </div>
         <div className="mx-auto mt-10 max-w-6xl border-t border-primary-foreground/10 px-4 pt-6 text-[11px] text-primary-foreground/40">© 2026 Acullagsa. Todos los derechos reservados.</div>
       </footer>}
-      <a href="https://wa.me/526699402253" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp" className="fixed bottom-5 right-5 z-50 flex size-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105"><MessageCircle className="size-6" /></a>
+      {!showBranches && <a href="https://wa.me/526699402253" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp" className="fixed bottom-5 right-5 z-50 flex size-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105"><MessageCircle className="size-6" /></a>}
       <ShoppingCart
         items={cartItems}
         open={cartOpen}
