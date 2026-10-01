@@ -196,7 +196,7 @@ function Brands() {
           <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Acumuladores & Llantas</p>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">Opciones para autos, camionetas, camiones y vehículos agrícolas. Te asesoramos para encontrar la medida adecuada.</p>
         </div>
-        <div className="mt-8 grid grid-cols-4 gap-px overflow-hidden rounded-md bg-border sm:mt-10">
+        <div className="mt-8 grid gap-px overflow-hidden rounded-md bg-border sm:mt-10" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
           {lthLines.map((item) => (
             <div key={item.name} className="flex min-h-24 items-center justify-center bg-background p-3 sm:min-h-32 sm:p-6">
               <img src={`/marcas/${item.image}`} alt={`LTH ${item.name}`} loading="lazy" className="h-12 w-full object-contain sm:h-16" />
