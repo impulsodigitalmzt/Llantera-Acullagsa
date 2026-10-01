@@ -162,7 +162,7 @@ function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
   </>;
 }
 
-function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quantity">) => void }) {
+function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void }) {
   const [tab, setTab] = useState<CatalogTab>("llantas");
 
   useEffect(() => {
@@ -299,12 +299,12 @@ function Index() {
     }
   }, [cartItems]);
 
-  const addToCart = (product: Omit<CartItem, "quantity">) => {
+  const addToCart = (product: Omit<CartItem, "quantity">, quantity = 1) => {
     setCartItems((items) => {
       const existing = items.find((item) => item.id === product.id);
       return existing
-        ? items.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
-        : [...items, { ...product, quantity: 1 }];
+        ? items.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item)
+        : [...items, { ...product, quantity }];
     });
     setCartOpen(true);
   };

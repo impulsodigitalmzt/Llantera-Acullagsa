@@ -1,22 +1,12 @@
 import { useMemo, useState } from "react";
 import { BatteryCharging, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ProductDetailDialog, type ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { BATTERY_CATALOG, VEHICLES, YEARS, money, shocksForVehicle } from "@/data/catalog";
 import type { CartItem } from "@/components/ShoppingCart";
 
 type Category = "acumuladores" | "amortiguadores";
-type ResultProduct = {
-  id: string;
-  brand: string;
-  name: string;
-  detail: string;
-  price: number;
-  list: number;
-  stock: boolean;
-  image?: string;
-  cartItem: Omit<CartItem, "quantity">;
-};
+type ResultProduct = ProductDetailProduct & { list: number; detail: string; stock: boolean };
 
 const BATTERY_IMAGES: Record<string, string> = {
   Automotriz: "LTH-Automotriz-2019-300x192.jpg",
@@ -47,7 +37,7 @@ const CONFIG: Record<Category, {
 
 export function ProductFinder({ category, onAddToCart }: {
   category: Category;
-  onAddToCart: (item: Omit<CartItem, "quantity">) => void;
+  onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
 }) {
   const cfg = CONFIG[category];
   const Icon = cfg.icon;
@@ -60,7 +50,7 @@ export function ProductFinder({ category, onAddToCart }: {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("relevance");
-  const [quickView, setQuickView] = useState<ResultProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetailProduct | null>(null);
 
   const canSearch = make && model && year;
   const resultId = `resultados-${category}`;
@@ -86,11 +76,23 @@ export function ProductFinder({ category, onAddToCart }: {
       id: `battery-${battery.group}-${battery.line}`,
       brand: battery.brand,
       name: `${battery.brand} ${battery.line}`,
+      category: "Acumulador",
+      sku: `LTH-${battery.group.replaceAll("/", "-")}-${battery.line.toUpperCase().replaceAll(" ", "-")}`,
       detail: `Grupo ${battery.group} · ${battery.cca} CCA · Garantía ${battery.warranty}`,
       price: battery.price,
       list: battery.list,
       stock: battery.stock,
+      stockCount: battery.stock ? 5 + battery.cca % 16 : 0,
       image: `/acumuladores/${BATTERY_IMAGES[battery.line]}`,
+      gallery: [`/acumuladores/${BATTERY_IMAGES[battery.line]}`],
+      description: `Acumulador LTH ${battery.line} para aplicaciones del grupo ${battery.group}. Su capacidad de arranque en frío es de ${battery.cca} CCA y cuenta con ${battery.warranty} de garantía. Confirma la compatibilidad y posición de bornes con tu vehículo antes de instalar.`,
+      specifications: [
+        { label: "Línea", value: battery.line },
+        { label: "Grupo", value: battery.group },
+        { label: "Amperaje de arranque (CCA)", value: `${battery.cca} A` },
+        { label: "Garantía", value: battery.warranty },
+        { label: "Posición de bornes", value: "Confirmar aplicación" },
+      ],
       cartItem: {
         id: `battery-${battery.group}-${battery.line}`,
         name: `${battery.brand} ${battery.line}`,
@@ -104,10 +106,22 @@ export function ProductFinder({ category, onAddToCart }: {
       id: `shock-${result?.make}-${result?.model}-${shock.brand}-${shock.position}`,
       brand: shock.brand,
       name: `${shock.brand} ${shock.model}`,
+      category: "Amortiguador",
+      sku: `${shock.brand}-${result?.make}-${result?.model}-${shock.position}`.replaceAll(" ", "-").toUpperCase(),
       detail: `${shock.position} · pieza`,
       price: shock.price,
       list: shock.list,
       stock: shock.stock,
+      stockCount: shock.stock ? 3 + (shock.price % 14) : 0,
+      gallery: [],
+      description: `Amortiguador ${shock.brand} ${shock.model} para ${result?.make} ${result?.model}, posición ${shock.position.toLowerCase()}. Confirma año, versión y lado de instalación antes de realizar el pedido.`,
+      specifications: [
+        { label: "Marca", value: shock.brand },
+        { label: "Línea", value: shock.model },
+        { label: "Posición", value: shock.position },
+        { label: "Vehículo", value: `${result?.make} ${result?.model} ${result?.year}` },
+        { label: "Tipo", value: "Amortiguador de suspensión" },
+      ],
       cartItem: {
         id: `shock-${result?.make}-${result?.model}-${shock.brand}-${shock.position}`,
         name: `${shock.brand} ${shock.model}`,
@@ -124,6 +138,10 @@ export function ProductFinder({ category, onAddToCart }: {
     .sort((a, b) => sort === "asc" ? a.price - b.price : sort === "desc" ? b.price - a.price : Number(b.stock) - Number(a.stock)),
   [products, brandFilter, onlyStock, minPrice, maxPrice, sort]);
   const brands = [...new Set(products.map((product) => product.brand))];
+  const relatedProducts = selectedProduct
+    ? products.filter((product) => product.id !== selectedProduct.id)
+      .sort((a, b) => Number(b.brand === selectedProduct.brand) - Number(a.brand === selectedProduct.brand))
+    : [];
 
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
@@ -165,8 +183,9 @@ export function ProductFinder({ category, onAddToCart }: {
           {shownProducts.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {shownProducts.map((product) => {
               const discount = Math.round((1 - product.price / product.list) * 100);
-              return <article key={product.id} className="flex flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md">
-                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.image ? <img src={product.image} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}</div>
+              const detailProduct: ProductDetailProduct = product;
+              return <article key={product.id} role="button" tabIndex={0} onClick={() => setSelectedProduct(detailProduct)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedProduct(detailProduct); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}</div>
                 <p className="mt-2 text-xs font-black italic text-primary">{product.brand}</p>
                 <h5 className="mt-1 font-black uppercase">{product.name}</h5>
                 <p className="text-sm font-bold">{product.detail}</p>
@@ -174,20 +193,13 @@ export function ProductFinder({ category, onAddToCart }: {
                 <p className="text-xl font-black text-primary">{money(product.price)}</p>
                 <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
                 <p className={`mt-1 text-xs font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
-                <Button variant="outline" className="mt-4" onClick={() => setQuickView(product)}><Eye /> Vista rápida</Button>
-                <Button variant="dark" className="mt-2" onClick={() => onAddToCart(product.cartItem)}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+                <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); setSelectedProduct(detailProduct); }}><Eye /> Vista rápida</Button>
+                <Button variant="dark" className="mt-2" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
               </article>;
             })}
           </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
         </div>
-        <Dialog open={quickView !== null} onOpenChange={(open) => { if (!open) setQuickView(null); }}>
-          {quickView && <DialogContent>
-            <DialogHeader><DialogTitle>{quickView.name}</DialogTitle><DialogDescription>{quickView.detail}</DialogDescription></DialogHeader>
-            {quickView.image ? <img src={quickView.image} alt={quickView.name} className="mx-auto aspect-[3/2] max-h-64 object-contain" /> : <div className="flex h-48 items-center justify-center"><Wrench className="size-20 text-primary" /></div>}
-            <div><p className="text-xl font-black text-primary">{money(quickView.price)}</p><p className="text-xs text-muted-foreground">IVA incluido · {quickView.stock ? "En existencia" : "Sobre pedido"}</p></div>
-            <Button variant="dark" onClick={() => { onAddToCart(quickView.cartItem); setQuickView(null); }}><ShoppingCart /> Añadir al carrito</Button>
-          </DialogContent>}
-        </Dialog>
+        <ProductDetailDialog product={selectedProduct} relatedProducts={relatedProducts} onSelectProduct={setSelectedProduct} onAddToCart={onAddToCart} />
       </section>
     )}
   </>;

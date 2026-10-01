@@ -1,11 +1,43 @@
 import { useMemo, useState } from "react";
 import { CarFront, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ProductDetailDialog, type ProductDetailProduct } from "@/components/ProductDetailDialog";
 import tireImg from "@/assets/tire.jpg";
 import type { CartItem } from "@/components/ShoppingCart";
 
 type Tire = { brand: string; model: string; size: string; load: string; price: number; list: number; stock: boolean };
+
+function toTireDetail(tire: Tire): ProductDetailProduct {
+  const id = `tire-${tire.brand}-${tire.model}-${tire.size}`;
+  const stockCount = tire.stock ? 6 + hash(`${tire.brand}${tire.size}`) % 18 : 0;
+  return {
+    id,
+    name: `${tire.brand} ${tire.model}`,
+    brand: tire.brand,
+    category: "Llanta",
+    sku: `${tire.size}-${tire.brand.replaceAll(" ", "-")}`,
+    price: tire.price,
+    stockCount,
+    gallery: [tireImg],
+    description: `Llanta ${tire.brand} ${tire.model} en medida ${tire.size}, diseñada para ofrecer desempeño y agarre confiables. Verifica la compatibilidad con las especificaciones de tu vehículo antes de instalar.`,
+    specifications: [
+      { label: "Medida", value: tire.size },
+      { label: "Índice de carga", value: tire.load.slice(0, -1) },
+      { label: "Código de velocidad", value: tire.load.slice(-1) },
+      { label: "Construcción", value: "Radial" },
+      { label: "Rin", value: tire.size.split("R")[1] ?? "Consultar" },
+      { label: "Disponibilidad", value: stockCount ? `${stockCount} unidades` : "Sobre pedido" },
+    ],
+    cartItem: {
+      id,
+      name: `${tire.brand} ${tire.model}`,
+      category: "Llanta",
+      detail: `${tire.size} · Índice ${tire.load} · ${tire.stock ? "En existencia" : "Sobre pedido"}`,
+      price: tire.price,
+      image: tireImg,
+    },
+  };
+}
 
 const BRANDS = ["GOODYEAR", "TORNEL", "JK TYRE", "TOLEDO TYRES", "EUZKADI", "GENERAL TIRE"];
 const MODELS: Record<string, string[]> = {
@@ -49,7 +81,7 @@ const money = (n: number) => `$ ${n.toLocaleString("es-MX")}.00`;
 export function TireFinder({ variant = "card", embedded = false, onAddToCart }: {
   variant?: "hero" | "card";
   embedded?: boolean;
-  onAddToCart: (item: Omit<CartItem, "quantity">) => void;
+  onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
 }) {
   const [mode, setMode] = useState<"size" | "vehicle">("size");
   const [w, setW] = useState(""); const [p, setP] = useState(""); const [r, setR] = useState("");
@@ -60,7 +92,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
   const [sort, setSort] = useState("relevance");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [quickView, setQuickView] = useState<Tire | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetailProduct | null>(null);
 
   const parsed = SIZES.map(parse);
   const widths = uniq(parsed.map((x) => x.w));
@@ -85,6 +117,11 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
     .filter((t) => !minPrice || t.price >= Number(minPrice))
     .filter((t) => !maxPrice || t.price <= Number(maxPrice))
     .sort((a, b) => sort === "asc" ? a.price - b.price : sort === "desc" ? b.price - a.price : Number(b.stock) - Number(a.stock)), [matches, brandFilter, onlyStock, minPrice, maxPrice, sort]);
+  const detailProducts = useMemo(() => matches.map(toTireDetail), [matches]);
+  const relatedProducts = selectedProduct
+    ? detailProducts.filter((item) => item.id !== selectedProduct.id)
+      .sort((a, b) => Number(b.brand === selectedProduct.brand) - Number(a.brand === selectedProduct.brand))
+    : [];
 
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
@@ -149,7 +186,8 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {shown.map((t) => {
                 const off = Math.round((1 - t.price / t.list) * 100);
-                return <article key={t.brand + t.model} className="flex flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md">
+                const detail = toTireDetail(t);
+                return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => setSelectedProduct(detail)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedProduct(detail); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <div className="relative"><span className="absolute left-0 top-0 rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
                     <p className="text-xs font-black italic text-primary">{t.brand}</p>
                     <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="mx-auto mt-2 aspect-square w-44 object-contain" /></div>
@@ -159,28 +197,21 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
                   <p className="text-xl font-black text-primary">{money(t.price)}</p>
                   <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
                   <p className={`mt-1 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
-                  <Button variant="outline" className="mt-4" onClick={() => setQuickView(t)}><Eye /> Vista rápida</Button>
-                  <Button variant="dark" className="mt-4" onClick={() => onAddToCart({
+                  <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); setSelectedProduct(detail); }}><Eye /> Vista rápida</Button>
+                  <Button variant="dark" className="mt-4" onClick={(event) => { event.stopPropagation(); onAddToCart({
                     id: `tire-${t.brand}-${t.model}-${t.size}`,
                     name: `${t.brand} ${t.model}`,
                     category: "Llanta",
                     detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`,
                     price: t.price,
                     image: tireImg,
-                  })}><ShoppingCart /> {t.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+                  }); }}><ShoppingCart /> {t.stock ? "Añadir al carrito" : "Cotizar"}</Button>
                 </article>;
               })}
             </div>
           ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay llantas con esos filtros. Escríbenos por WhatsApp y la conseguimos.</p>}
         </div>
-        <Dialog open={quickView !== null} onOpenChange={(open) => { if (!open) setQuickView(null); }}>
-          {quickView && <DialogContent>
-            <DialogHeader><DialogTitle>{quickView.brand} {quickView.model}</DialogTitle><DialogDescription>{quickView.size} · Índice {quickView.load}</DialogDescription></DialogHeader>
-            <img src={tireImg} alt={`Llanta ${quickView.brand} ${quickView.model}`} className="mx-auto aspect-square max-h-64 object-contain" />
-            <div><p className="text-xl font-black text-primary">{money(quickView.price)}</p><p className="text-xs text-muted-foreground">IVA incluido · {quickView.stock ? "En existencia" : "Sobre pedido"}</p></div>
-            <Button variant="dark" onClick={() => { onAddToCart({ id: `tire-${quickView.brand}-${quickView.model}-${quickView.size}`, name: `${quickView.brand} ${quickView.model}`, category: "Llanta", detail: `${quickView.size} · Índice ${quickView.load} · ${quickView.stock ? "En existencia" : "Sobre pedido"}`, price: quickView.price, image: tireImg }); setQuickView(null); }}><ShoppingCart /> Añadir al carrito</Button>
-          </DialogContent>}
-        </Dialog>
+        <ProductDetailDialog product={selectedProduct} relatedProducts={relatedProducts} onSelectProduct={setSelectedProduct} onAddToCart={onAddToCart} />
       </section>
   ) : null;
 
