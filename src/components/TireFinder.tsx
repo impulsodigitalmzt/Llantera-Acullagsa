@@ -147,17 +147,15 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
   const formGrid = "mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
-  const [isDragging, setIsDragging] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
   const scrollCarousel = (direction: 1 | -1) => {
     const el = carouselRef.current;
     if (!el) return;
     const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
-    const scrollAmount = direction * (cardWidth + 16);
+    const scrollAmount = direction * (cardWidth + 12);
     el.scrollBy({ left: scrollAmount, behavior: "smooth" });
     const nextIndex = Math.max(0, Math.min(shown.length - 1, activeSlide + direction));
     setActiveSlide(nextIndex);
@@ -167,29 +165,8 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
     const el = carouselRef.current;
     if (!el || !shown.length) return;
     const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
-    const center = el.scrollLeft + el.clientWidth / 2;
-    const index = Math.round(center / (cardWidth + 16));
+    const index = Math.round(el.scrollLeft / (cardWidth + 12));
     setActiveSlide(Math.max(0, Math.min(shown.length - 1, index)));
-  };
-
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const el = event.currentTarget;
-    dragState.current = { startX: event.clientX, scrollLeft: el.scrollLeft };
-    setIsDragging(true);
-    el.setPointerCapture?.(event.pointerId);
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragState.current) return;
-    const el = event.currentTarget;
-    const delta = event.clientX - dragState.current.startX;
-    el.scrollLeft = dragState.current.scrollLeft - delta;
-  };
-
-  const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    dragState.current = null;
-    setIsDragging(false);
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
   };
 
   const card = (
@@ -294,11 +271,11 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
               <div className="absolute -right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
                 <button type="button" aria-label="Siguiente" onClick={() => scrollCarousel(1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronRight className="size-4" /></button>
               </div>
-              <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch", touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp} onPointerCancel={onPointerUp} onScroll={handleCarouselScroll}>
+              <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }} onScroll={handleCarouselScroll}>
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
                   const detail = toTireDetail(t);
-                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex min-w-[62%] max-w-[62%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex basis-[calc(50%_-_6px)] shrink-0 snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
                     <div className="relative rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
                       <div className="flex h-4 items-center justify-center">{BRAND_LOGOS[t.brand] ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-4 max-w-20 object-contain" /> : <span className="text-[11px] font-black italic text-primary">{t.brand}</span>}</div>
                       <div className="relative mx-auto mt-2 w-32 sm:w-full"><img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" /><Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button></div></div>
