@@ -82,6 +82,10 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
               <button type="button" onClick={() => document.getElementById("caracteristicas-producto")?.scrollIntoView({ behavior: "smooth" })} className="mt-4 text-sm font-semibold text-primary hover:underline">Ver todas las características</button>
             </section>
           </div>
+          <section className="mt-1 border-t border-border pt-5" aria-labelledby="descripcion-producto">
+            <h2 id="descripcion-producto" className="text-xl font-black">Descripción</h2>
+            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.description}</p>
+          </section>
 
           <aside className="h-fit border border-border p-5">
             <p className="text-3xl font-black text-primary">{money(product.price)}</p>
@@ -111,11 +115,6 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
             </div>
           </aside>
         </div>
-
-        <section className="mt-8 border-t border-border pt-7" aria-labelledby="descripcion-producto">
-          <h2 id="descripcion-producto" className="text-xl font-black">Descripción</h2>
-          <p className="mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.description}</p>
-        </section>
 
         {relatedProducts.length > 0 && <section className="mt-10 border-t border-border pt-7">
           <div className="flex items-center justify-between gap-3">
