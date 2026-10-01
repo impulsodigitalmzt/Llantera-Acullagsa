@@ -301,9 +301,10 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
   return (
     <section
       id="buscador"
-      className="relative z-10 mx-auto max-w-6xl scroll-mt-28 px-4 -mt-24 pb-16 sm:-mt-28"
+      className="relative z-10 mx-auto max-w-6xl scroll-mt-28 px-4 pb-16"
       aria-label="Catálogo de productos"
     >
+      <span id="inicio" className="sr-only">Inicio</span>
       <span id="llantas" className="sr-only">Llantas</span>
       <span id="acumuladores" className="sr-only">Acumuladores LTH</span>
       <span id="amortiguadores" className="sr-only">Amortiguadores</span>
@@ -467,11 +468,6 @@ function Index() {
       <Header cartCount={cartCount} onOpenCart={() => setCartOpen(true)} />
       <main>
         {productSelection ? null : showBranches ? <Branches /> : <>
-          <section id="inicio" className="relative overflow-hidden bg-brand-ink">
-            <img src="https://via.placeholder.com/1600x900?text=Hero" width={1600} height={900} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover object-[66%_center] opacity-25" />
-            <div className="absolute inset-0 bg-hero-overlay" />
-            <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-14" />
-          </section>
           <CatalogHub onAddToCart={addToCart} onOpenProduct={openProduct} />
 
           <section id="servicios" className="bg-brand-ink py-20 text-primary-foreground"><div className="mx-auto max-w-6xl px-4"><div className="max-w-3xl"><p className="text-xs font-bold uppercase text-primary">Centro de servicio LTH</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">No solo vendemos.<br/>Te ponemos en marcha.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-primary-foreground/70">Contamos con equipo y personal capacitado para diagnosticar, instalar y cuidar tu vehículo con procesos confiables.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{serviceItems.map(([Icon, label]) => <div key={label} className="flex items-center gap-3 border-b border-primary-foreground/15 pb-4 text-sm font-bold"><Icon className="size-5 text-primary" />{label}</div>)}</div><Button asChild size="xl" variant="hero" className="mt-8"><a href="tel:6699855424"><Phone /> Cotizar servicio</a></Button></div></div></section>
