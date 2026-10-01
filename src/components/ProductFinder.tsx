@@ -1,10 +1,22 @@
 import { useMemo, useState } from "react";
-import { BatteryCharging, CircleDot, Search, ShoppingCart, Wrench } from "lucide-react";
+import { BatteryCharging, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BATTERY_CATALOG, VEHICLES, YEARS, money, shocksForVehicle } from "@/data/catalog";
 import type { CartItem } from "@/components/ShoppingCart";
 
 type Category = "acumuladores" | "amortiguadores";
+type ResultProduct = {
+  id: string;
+  brand: string;
+  name: string;
+  detail: string;
+  price: number;
+  list: number;
+  stock: boolean;
+  image?: string;
+  cartItem: Omit<CartItem, "quantity">;
+};
 
 const BATTERY_IMAGES: Record<string, string> = {
   Automotriz: "LTH-Automotriz-2019-300x192.jpg",
@@ -43,12 +55,19 @@ export function ProductFinder({ category, onAddToCart }: {
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
   const [result, setResult] = useState<{ make: string; model: string; year: string } | null>(null);
+  const [brandFilter, setBrandFilter] = useState<string[]>([]);
+  const [onlyStock, setOnlyStock] = useState(false);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sort, setSort] = useState("relevance");
+  const [quickView, setQuickView] = useState<ResultProduct | null>(null);
 
   const canSearch = make && model && year;
   const resultId = `resultados-${category}`;
 
   const search = () => {
     if (!canSearch) return;
+    setBrandFilter([]); setOnlyStock(false); setMinPrice(""); setMaxPrice(""); setSort("relevance");
     setResult({ make, model, year });
     setTimeout(() => document.getElementById(resultId)?.scrollIntoView({ behavior: "smooth" }), 50);
   };
@@ -62,6 +81,49 @@ export function ProductFinder({ category, onAddToCart }: {
     () => (category === "amortiguadores" && result ? shocksForVehicle(result.make, result.model) : []),
     [category, result],
   );
+  const products = useMemo<ResultProduct[]>(() => category === "acumuladores"
+    ? batteries.map((battery) => ({
+      id: `battery-${battery.group}-${battery.line}`,
+      brand: battery.brand,
+      name: `${battery.brand} ${battery.line}`,
+      detail: `Grupo ${battery.group} · ${battery.cca} CCA · Garantía ${battery.warranty}`,
+      price: battery.price,
+      list: battery.list,
+      stock: battery.stock,
+      image: `/acumuladores/${BATTERY_IMAGES[battery.line]}`,
+      cartItem: {
+        id: `battery-${battery.group}-${battery.line}`,
+        name: `${battery.brand} ${battery.line}`,
+        category: "Acumulador",
+        detail: `Grupo ${battery.group} · ${battery.cca} CCA · ${result?.make} ${result?.model} ${result?.year} · ${battery.stock ? "En existencia" : "Sobre pedido"}`,
+        price: battery.price,
+        image: `/acumuladores/${BATTERY_IMAGES[battery.line]}`,
+      },
+    }))
+    : shocks.map((shock) => ({
+      id: `shock-${result?.make}-${result?.model}-${shock.brand}-${shock.position}`,
+      brand: shock.brand,
+      name: `${shock.brand} ${shock.model}`,
+      detail: `${shock.position} · pieza`,
+      price: shock.price,
+      list: shock.list,
+      stock: shock.stock,
+      cartItem: {
+        id: `shock-${result?.make}-${result?.model}-${shock.brand}-${shock.position}`,
+        name: `${shock.brand} ${shock.model}`,
+        category: "Amortiguador",
+        detail: `${shock.position} · ${result?.make} ${result?.model} ${result?.year} · ${shock.stock ? "En existencia" : "Sobre pedido"}`,
+        price: shock.price,
+      },
+    })), [category, batteries, shocks, result]);
+  const shownProducts = useMemo(() => products
+    .filter((product) => !brandFilter.length || brandFilter.includes(product.brand))
+    .filter((product) => !onlyStock || product.stock)
+    .filter((product) => !minPrice || product.price >= Number(minPrice))
+    .filter((product) => !maxPrice || product.price <= Number(maxPrice))
+    .sort((a, b) => sort === "asc" ? a.price - b.price : sort === "desc" ? b.price - a.price : Number(b.stock) - Number(a.stock)),
+  [products, brandFilter, onlyStock, minPrice, maxPrice, sort]);
+  const brands = [...new Set(products.map((product) => product.brand))];
 
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
@@ -81,72 +143,52 @@ export function ProductFinder({ category, onAddToCart }: {
       </div>
     </div>
 
-    {result && category === "acumuladores" && (
-      <div id={resultId} className="scroll-mt-28 pt-10">
-        <p className="text-xs font-bold uppercase text-primary">{result.make} {result.model} {result.year} · Grupo {batteryGroup}</p>
-        <h4 className="mt-1 text-2xl font-black">Acumuladores compatibles ({batteries.length})</h4>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {batteries.map((b) => {
-            const off = Math.round((1 - b.price / b.list) * 100);
-            return <article key={b.line} className="flex flex-col rounded-md border border-border bg-background p-5 transition-shadow hover:shadow-lg">
-              <div className="mb-4 flex aspect-[3/2] items-center justify-center rounded-md bg-brand-soft p-3">
-                <img src={`/acumuladores/${BATTERY_IMAGES[b.line]}`} alt={`${b.brand} ${b.line}`} loading="lazy" className="size-full object-contain" />
-              </div>
-              <div className="flex items-start justify-between">
-                <p className="text-xs font-black italic text-primary">{b.brand}</p>
-                <span className="rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
-              </div>
-              <h5 className="mt-2 text-lg font-black uppercase">{b.brand} {b.line}</h5>
-              <p className="text-sm font-bold">Grupo {b.group} · {b.cca} CCA</p>
-              <p className="mt-1 text-xs text-muted-foreground">Garantía {b.warranty}</p>
-              <p className="mt-3 text-sm text-muted-foreground line-through">{money(b.list)}</p>
-              <p className="text-xl font-black text-primary">{money(b.price)}</p>
-              <p className={`mt-1 text-xs font-semibold ${b.stock ? "text-foreground" : "text-muted-foreground"}`}>{b.stock ? "En existencia" : "Sobre pedido"}</p>
-              <Button variant="dark" className="mt-4" onClick={() => onAddToCart({
-                id: `battery-${b.group}-${b.line}`,
-                name: `${b.brand} ${b.line}`,
-                category: "Acumulador",
-                detail: `Grupo ${b.group} · ${b.cca} CCA · ${result.make} ${result.model} ${result.year} · ${b.stock ? "En existencia" : "Sobre pedido"}`,
-                price: b.price,
-                image: `/acumuladores/${BATTERY_IMAGES[b.line]}`,
-              })}><ShoppingCart /> {b.stock ? "Agregar al carrito" : "Agregar por pedido"}</Button>
-            </article>;
-          })}
+    {result && (
+      <section id={resultId} className="scroll-mt-28 pt-10">
+        <div className="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase text-primary">{result.make} {result.model} {result.year}{category === "acumuladores" ? ` · Grupo ${batteryGroup}` : ""}</p>
+            <h4 className="mt-1 text-2xl font-black">{category === "acumuladores" ? "Acumuladores compatibles" : "Amortiguadores compatibles"}</h4>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <span className="text-muted-foreground">{shownProducts.length} de {products.length} productos</span>
+            <label className="flex items-center gap-2 font-semibold">Ordenar por<select aria-label="Ordenar productos" value={sort} onChange={(event) => setSort(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3"><option value="relevance">Relevancia</option><option value="asc">Precio, menor a mayor</option><option value="desc">Precio, mayor a menor</option></select></label>
+          </div>
         </div>
-      </div>
-    )}
-
-    {result && category === "amortiguadores" && (
-      <div id={resultId} className="scroll-mt-28 pt-10">
-        <p className="text-xs font-bold uppercase text-primary">{result.make} {result.model} {result.year}</p>
-        <h4 className="mt-1 text-2xl font-black">Amortiguadores compatibles ({shocks.length})</h4>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {shocks.map((s) => {
-            const off = Math.round((1 - s.price / s.list) * 100);
-            return <article key={s.brand + s.position} className="flex flex-col rounded-md border border-border bg-background p-5 transition-shadow hover:shadow-lg">
-              <div className="mb-4 flex aspect-[3/2] items-center justify-center rounded-md bg-brand-soft">
-                <Wrench className="size-14 text-primary" />
-              </div>
-              <div className="flex items-start justify-between">
-                <p className="text-xs font-black italic text-primary">{s.brand}</p>
-                <span className="rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
-              </div>
-              <h5 className="mt-2 text-lg font-black uppercase">{s.brand} {s.model}</h5>
-              <p className="text-sm font-bold">{s.position} · pieza</p>
-              <p className="mt-3 text-sm text-muted-foreground line-through">{money(s.list)}</p>
-              <p className="text-xl font-black text-primary">{money(s.price)}</p>
-              <p className={`mt-1 text-xs font-semibold ${s.stock ? "text-foreground" : "text-muted-foreground"}`}>{s.stock ? "En existencia" : "Sobre pedido"}</p>
-              <Button variant="dark" className="mt-4" onClick={() => onAddToCart({
-                id: `shock-${result.make}-${result.model}-${s.brand}-${s.position}`,
-                name: `${s.brand} ${s.model}`,
-                category: "Amortiguador",
-                detail: `${s.position} · ${result.make} ${result.model} ${result.year} · ${s.stock ? "En existencia" : "Sobre pedido"}`,
-                price: s.price,
-              })}><ShoppingCart /> {s.stock ? "Agregar al carrito" : "Agregar por pedido"}</Button>
-            </article>;
-          })}
+        <div className="mt-6 grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <aside className="space-y-6 border-b border-border pb-5 text-sm lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
+            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest"><SlidersHorizontal className="size-4" /> Filtros</p>
+            <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Disponibilidad</p><label className="mt-3 flex items-center gap-2"><input type="checkbox" checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} className="accent-primary" /> En existencia<span className="ml-auto text-xs text-muted-foreground">{products.filter((product) => product.stock).length}</span></label></div>
+            <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Precio</p><div className="mt-3 grid grid-cols-2 gap-2"><label className="text-xs text-muted-foreground">Mínimo<input type="number" min="0" inputMode="numeric" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder="$0" className="mt-1 h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label><label className="text-xs text-muted-foreground">Máximo<input type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Sin límite" className="mt-1 h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label></div></div>
+            <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Marca</p>{brands.map((brand) => <label key={brand} className="mt-3 flex items-center gap-2"><input type="checkbox" checked={brandFilter.includes(brand)} onChange={(event) => setBrandFilter(event.target.checked ? [...brandFilter, brand] : brandFilter.filter((selected) => selected !== brand))} className="accent-primary" /> {brand}<span className="ml-auto text-xs text-muted-foreground">{products.filter((product) => product.brand === brand).length}</span></label>)}</div>
+          </aside>
+          {shownProducts.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {shownProducts.map((product) => {
+              const discount = Math.round((1 - product.price / product.list) * 100);
+              return <article key={product.id} className="flex flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md">
+                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.image ? <img src={product.image} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}</div>
+                <p className="mt-2 text-xs font-black italic text-primary">{product.brand}</p>
+                <h5 className="mt-1 font-black uppercase">{product.name}</h5>
+                <p className="text-sm font-bold">{product.detail}</p>
+                <p className="mt-2 text-sm text-muted-foreground line-through">{money(product.list)}</p>
+                <p className="text-xl font-black text-primary">{money(product.price)}</p>
+                <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
+                <p className={`mt-1 text-xs font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
+                <Button variant="outline" className="mt-4" onClick={() => setQuickView(product)}><Eye /> Vista rápida</Button>
+                <Button variant="dark" className="mt-2" onClick={() => onAddToCart(product.cartItem)}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+              </article>;
+            })}
+          </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
         </div>
-      </div>
+        <Dialog open={quickView !== null} onOpenChange={(open) => { if (!open) setQuickView(null); }}>
+          {quickView && <DialogContent>
+            <DialogHeader><DialogTitle>{quickView.name}</DialogTitle><DialogDescription>{quickView.detail}</DialogDescription></DialogHeader>
+            {quickView.image ? <img src={quickView.image} alt={quickView.name} className="mx-auto aspect-[3/2] max-h-64 object-contain" /> : <div className="flex h-48 items-center justify-center"><Wrench className="size-20 text-primary" /></div>}
+            <div><p className="text-xl font-black text-primary">{money(quickView.price)}</p><p className="text-xs text-muted-foreground">IVA incluido · {quickView.stock ? "En existencia" : "Sobre pedido"}</p></div>
+            <Button variant="dark" onClick={() => { onAddToCart(quickView.cartItem); setQuickView(null); }}><ShoppingCart /> Añadir al carrito</Button>
+          </DialogContent>}
+        </Dialog>
+      </section>
     )}
   </>;
 }
