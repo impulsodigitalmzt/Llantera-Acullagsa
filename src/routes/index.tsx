@@ -227,15 +227,14 @@ function BrandLogo({ inverted = false }: { inverted?: boolean }) {
 
 function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () => void }) {
   const [open, setOpen] = useState(false);
-  return <>
+  return <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
     <div className="bg-brand-ink text-primary-foreground">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2 text-xs">
         <span className="flex items-center gap-2"><MapPin className="size-3.5 text-primary" /> Servicio en Mazatlán, Sinaloa</span>
         <a href="tel:6699404388" className="hidden items-center gap-2 font-semibold sm:flex"><Phone className="size-3.5 text-primary" /> 669 940 4388</a>
       </div>
     </div>
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4">
+    <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4">
         <a href="#inicio" aria-label="Acullagsa, inicio" className="flex items-center">
           <BrandLogo />
         </a>
@@ -251,8 +250,8 @@ function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
           <Button asChild variant="hero" className="hidden sm:inline-flex"><a href="https://wa.me/526699402253" target="_blank" rel="noreferrer"><MessageCircle /> Cotizar</a></Button>
           <Button variant="ghost" size="icon" aria-label={open ? "Cerrar menú" : "Abrir menú"} className="lg:hidden" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</Button>
         </div>
-      </div>
-      {open && <nav className="absolute right-3 top-full z-50 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden border border-border border-t-2 border-t-primary bg-background shadow-2xl ring-1 ring-black/5 lg:hidden" aria-label="Navegación móvil">
+    </div>
+    {open && <nav className="absolute right-3 top-full z-50 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden border border-border border-t-2 border-t-primary bg-background shadow-2xl ring-1 ring-black/5 lg:hidden" aria-label="Navegación móvil">
         <div className="flex items-center justify-between bg-brand-ink px-4 py-3 text-primary-foreground">
           <span className="text-xs font-black uppercase">Explorar</span>
           <span className="text-[10px] font-semibold uppercase text-primary-foreground/60">Acullagsa</span>
@@ -268,8 +267,7 @@ function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
           })}
         </div>
       </nav>}
-    </header>
-  </>;
+  </header>;
 }
 
 type ProductSelection = { product: ProductDetailProduct; products: ProductDetailProduct[] };
@@ -337,7 +335,7 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
         ref={tablistRef}
         role="tablist"
         aria-label="Categorías de producto"
-        className="sticky top-20 z-30 grid grid-cols-3 overflow-hidden rounded-t-md bg-brand-ink shadow-2xl ring-1 ring-border"
+        className="sticky top-28 z-30 grid grid-cols-3 overflow-hidden rounded-t-md bg-brand-ink shadow-2xl ring-1 ring-border"
       >
         {catalogTabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
