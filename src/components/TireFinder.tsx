@@ -233,15 +233,31 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">{shown.length} de {matches.length} productos</span>
             <label className="flex items-center gap-2 font-semibold">Ordenar por<select aria-label="Ordenar productos" value={sort} onChange={(e) => setSort(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3"><option value="relevance">Relevancia</option><option value="asc">Precio, menor a mayor</option><option value="desc">Precio, mayor a menor</option></select></label></div>
         </div>
-        <div className="mt-6 grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="space-y-6 border-b border-border pb-5 text-sm lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
-            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest"><SlidersHorizontal className="size-4" /> Filtros</p>
-            <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Disponibilidad</p>
-              <label className="mt-3 flex items-center gap-2"><input type="checkbox" checked={onlyStock} onChange={(e) => setOnlyStock(e.target.checked)} className="accent-primary" /> En existencia <span className="ml-auto text-xs text-muted-foreground">{matches.filter((t) => t.stock).length}</span></label></div>
-            <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Precio</p>
-              <div className="mt-3 grid grid-cols-2 gap-2"><label className="text-xs text-muted-foreground">Mínimo<input inputMode="numeric" type="number" min="0" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" className="mt-1 h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label><label className="text-xs text-muted-foreground">Máximo<input inputMode="numeric" type="number" min="0" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Sin límite" className="mt-1 h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label></div></div>
-            <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Marca</p>
-              {[...new Set(matches.map((t) => t.brand))].map((b) => <label key={b} className="mt-3 flex items-center gap-2"><input type="checkbox" className="accent-primary" checked={brandFilter.includes(b)} onChange={(e) => setBrandFilter(e.target.checked ? [...brandFilter, b] : brandFilter.filter((x) => x !== b))} /> {b}<span className="ml-auto text-xs text-muted-foreground">{matches.filter((t) => t.brand === b).length}</span></label>)}</div>
+        <div className="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
+          <aside className="rounded-xl border border-border bg-muted/20 p-3 text-sm shadow-sm lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:pr-6">
+            <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
+              <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-foreground"><SlidersHorizontal className="size-3.5" /> Filtros</p>
+              <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-bold text-muted-foreground">{matches.length}</span>
+            </div>
+            <div className="space-y-3 pt-3 lg:space-y-5">
+              <div>
+                <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Disponibilidad</p>
+                <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={onlyStock} onChange={(e) => setOnlyStock(e.target.checked)} className="accent-primary" /> En existencia <span className="ml-auto text-xs text-muted-foreground">{matches.filter((t) => t.stock).length}</span></label>
+              </div>
+              <div>
+                <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Precio</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <label className="text-[11px] text-muted-foreground">Mínimo<input inputMode="numeric" type="number" min="0" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label>
+                  <label className="text-[11px] text-muted-foreground">Máximo<input inputMode="numeric" type="number" min="0" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Sin límite" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label>
+                </div>
+              </div>
+              <div>
+                <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Marca</p>
+                <div className="mt-2 space-y-2">
+                  {[...new Set(matches.map((t) => t.brand))].map((b) => <label key={b} className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-primary" checked={brandFilter.includes(b)} onChange={(e) => setBrandFilter(e.target.checked ? [...brandFilter, b] : brandFilter.filter((x) => x !== b))} /> {b}<span className="ml-auto text-xs text-muted-foreground">{matches.filter((t) => t.brand === b).length}</span></label>)}
+                </div>
+              </div>
+            </div>
           </aside>
           {shown.length ? (
             <div className="relative">
@@ -265,37 +281,37 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
                   const detail = toTireDetail(t);
-                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex min-w-[78%] max-w-[78%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-4 text-center shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
-                    <div className="relative rounded-lg bg-muted/40 p-3"><span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
-                      <div className="flex h-6 items-center justify-center">
+                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex min-w-[78%] max-w-[78%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-3 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                    <div className="relative rounded-lg bg-muted/40 p-2.5"><span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
+                      <div className="flex h-5 items-center justify-center">
                         {BRAND_LOGOS[t.brand]
-                          ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-5 max-w-28 object-contain" />
-                          : <span className="text-xs font-black italic text-primary">{t.brand}</span>}
+                          ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-4 max-w-24 object-contain" />
+                          : <span className="text-[11px] font-black italic text-primary">{t.brand}</span>}
                       </div>
-                      <div className="relative mx-auto mt-2 w-44 sm:w-full">
+                      <div className="relative mx-auto mt-2 w-40 sm:w-full">
                         <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" />
                         <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button>
                       </div></div>
-                    <div className="mt-4 flex min-h-[156px] flex-col">
-                      <h3 className="font-black uppercase leading-tight">{t.brand} {t.model}</h3>
-                      <p className="mt-1 text-sm font-bold text-muted-foreground">{t.size} · {t.load}</p>
-                      <p className="mt-2 text-sm text-muted-foreground line-through">{money(t.list)}</p>
-                      <p className="text-2xl font-black tracking-tight text-primary">{money(t.price)}</p>
-                      <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
-                      <p className={`mt-2 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
+                    <div className="mt-3 flex min-h-[128px] flex-col">
+                      <h3 className="text-sm font-black uppercase leading-tight">{t.brand} {t.model}</h3>
+                      <p className="mt-1 text-xs font-bold text-muted-foreground">{t.size} · {t.load}</p>
+                      <p className="mt-2 text-xs text-muted-foreground line-through">{money(t.list)}</p>
+                      <p className="text-xl font-black tracking-tight text-primary">{money(t.price)}</p>
+                      <p className="text-[10px] text-muted-foreground">Precio con IVA incluido</p>
+                      <p className={`mt-1 text-[11px] font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
                     </div>
-                    <Button variant="dark" className="mt-auto w-full" onClick={(event) => { event.stopPropagation(); onAddToCart({
+                    <Button variant="dark" className="mt-auto h-10 w-full text-xs" onClick={(event) => { event.stopPropagation(); onAddToCart({
                       id: `tire-${t.brand}-${t.model}-${t.size}`,
                       name: `${t.brand} ${t.model}`,
                       category: "Llanta",
                       detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`,
                       price: t.price,
                       image: tireImg,
-                    }); }}><ShoppingCart /> {t.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+                    }); }}><ShoppingCart /> {t.stock ? "Añadir" : "Cotizar"}</Button>
                   </article>;
                 })}
               </div>
-              <div className="mt-4 flex items-center justify-center gap-2 md:hidden">
+              <div className="mt-3 flex items-center justify-center gap-2 md:hidden">
                 {shown.map((_, index) => (
                   <button
                     key={index}
@@ -308,7 +324,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                       card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
                       setActiveSlide(index);
                     }}
-                    className={`h-2.5 rounded-full transition-all ${index === activeSlide ? "w-8 bg-primary" : "w-2.5 bg-border"}`}
+                    className={`h-2 rounded-full transition-all ${index === activeSlide ? "w-7 bg-primary" : "w-2 bg-border"}`}
                   />
                 ))}
               </div>
