@@ -167,7 +167,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
                     detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`,
                     price: t.price,
                     image: tireImg,
-                  })}><ShoppingCart /> {t.stock ? "Agregar al carrito" : "Agregar por pedido"}</Button>
+                  })}><ShoppingCart /> {t.stock ? "Añadir al carrito" : "Cotizar"}</Button>
                 </article>;
               })}
             </div>
