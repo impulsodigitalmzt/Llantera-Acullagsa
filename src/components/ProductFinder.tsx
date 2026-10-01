@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { BatteryCharging, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { BatteryCharging, ChevronLeft, ChevronRight, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { ProductQuickView } from "@/components/ProductQuickView";
@@ -157,6 +157,49 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 sm:px-3 sm:text-sm";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
   const formGrid = "mt-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
+  const [isDragging, setIsDragging] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollCarousel = (direction: 1 | -1) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
+    const scrollAmount = direction * (cardWidth + 16);
+    el.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    const nextIndex = Math.max(0, Math.min(shownProducts.length - 1, activeSlide + direction));
+    setActiveSlide(nextIndex);
+  };
+
+  const handleCarouselScroll = () => {
+    const el = carouselRef.current;
+    if (!el || !shownProducts.length) return;
+    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
+    const center = el.scrollLeft + el.clientWidth / 2;
+    const index = Math.round(center / (cardWidth + 16));
+    setActiveSlide(Math.max(0, Math.min(shownProducts.length - 1, index)));
+  };
+
+  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const el = event.currentTarget;
+    dragState.current = { startX: event.clientX, scrollLeft: el.scrollLeft };
+    setIsDragging(true);
+    el.setPointerCapture?.(event.pointerId);
+  };
+
+  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragState.current) return;
+    const el = event.currentTarget;
+    const delta = event.clientX - dragState.current.startX;
+    el.scrollLeft = dragState.current.scrollLeft - delta;
+  };
+
+  const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    dragState.current = null;
+    setIsDragging(false);
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+  };
 
   return <>
     <div className="overflow-hidden rounded-md bg-background shadow-xl ring-1 ring-border">
@@ -191,22 +234,59 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
             <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Precio</p><div className="mt-3 grid grid-cols-2 gap-2"><label className="text-xs text-muted-foreground">Mínimo<input type="number" min="0" inputMode="numeric" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder="$0" className="mt-1 h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label><label className="text-xs text-muted-foreground">Máximo<input type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Sin límite" className="mt-1 h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label></div></div>
             <div><p className="border-b border-border pb-2 text-xs font-black uppercase tracking-widest">Marca</p>{brands.map((brand) => <label key={brand} className="mt-3 flex items-center gap-2"><input type="checkbox" checked={brandFilter.includes(brand)} onChange={(event) => setBrandFilter(event.target.checked ? [...brandFilter, brand] : brandFilter.filter((selected) => selected !== brand))} className="accent-primary" /> {brand}<span className="ml-auto text-xs text-muted-foreground">{products.filter((product) => product.brand === brand).length}</span></label>)}</div>
           </aside>
-          {shownProducts.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {shownProducts.length ? <div className="relative">
+            <div className="absolute -left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
+              <button type="button" aria-label="Anterior" onClick={() => scrollCarousel(-1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronLeft className="size-4" /></button>
+            </div>
+            <div className="absolute -right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
+              <button type="button" aria-label="Siguiente" onClick={() => scrollCarousel(1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronRight className="size-4" /></button>
+            </div>
+            <div
+              ref={carouselRef}
+              className="flex gap-4 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3"
+              style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch", touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerLeave={onPointerUp}
+              onPointerCancel={onPointerUp}
+              onScroll={handleCarouselScroll}
+            >
             {shownProducts.map((product) => {
               const discount = Math.round((1 - product.price / product.list) * 100);
               const detailProduct: ProductDetailProduct = product;
-              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
-                <p className="mt-2 text-xs font-black italic text-primary">{product.brand}</p>
-                <h5 className="mt-1 font-black uppercase">{product.name}</h5>
-                <p className="text-sm font-bold">{product.detail}</p>
-                <p className="mt-2 text-sm text-muted-foreground line-through">{money(product.list)}</p>
-                <p className="text-xl font-black text-primary">{money(product.price)}</p>
-                <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
-                <p className={`mt-1 text-xs font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
-                <Button variant="dark" className="mt-4" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex min-w-[78%] max-w-[78%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-4 text-center shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                <div className="relative flex aspect-square items-center justify-center rounded-lg bg-muted/40 p-3"><span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
+                <div className="mt-4 flex min-h-[156px] flex-col">
+                  <p className="text-xs font-black italic text-primary">{product.brand}</p>
+                  <h5 className="mt-1 font-black uppercase leading-tight">{product.name}</h5>
+                  <p className="mt-1 text-sm font-bold text-muted-foreground">{product.detail}</p>
+                  <p className="mt-2 text-sm text-muted-foreground line-through">{money(product.list)}</p>
+                  <p className="text-2xl font-black tracking-tight text-primary">{money(product.price)}</p>
+                  <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
+                  <p className={`mt-2 text-xs font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
+                </div>
+                <Button variant="dark" className="mt-auto w-full" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
               </article>;
             })}
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-2 md:hidden">
+              {shownProducts.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  aria-label={`Ir al producto ${index + 1}`}
+                  onClick={() => {
+                    const el = carouselRef.current;
+                    if (!el) return;
+                    const card = el.querySelectorAll("article")[index];
+                    card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+                    setActiveSlide(index);
+                  }}
+                  className={`h-2.5 rounded-full transition-all ${index === activeSlide ? "w-8 bg-primary" : "w-2.5 bg-border"}`}
+                />
+              ))}
+            </div>
           </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
         </div>
       </section>

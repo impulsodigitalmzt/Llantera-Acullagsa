@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { CarFront, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { CarFront, ChevronLeft, ChevronRight, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { ProductQuickView } from "@/components/ProductQuickView";
@@ -147,6 +147,49 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
   const formGrid = "mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
+  const [isDragging, setIsDragging] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollCarousel = (direction: 1 | -1) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
+    const scrollAmount = direction * (cardWidth + 16);
+    el.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    const nextIndex = Math.max(0, Math.min(shown.length - 1, activeSlide + direction));
+    setActiveSlide(nextIndex);
+  };
+
+  const handleCarouselScroll = () => {
+    const el = carouselRef.current;
+    if (!el || !shown.length) return;
+    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
+    const center = el.scrollLeft + el.clientWidth / 2;
+    const index = Math.round(center / (cardWidth + 16));
+    setActiveSlide(Math.max(0, Math.min(shown.length - 1, index)));
+  };
+
+  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const el = event.currentTarget;
+    dragState.current = { startX: event.clientX, scrollLeft: el.scrollLeft };
+    setIsDragging(true);
+    el.setPointerCapture?.(event.pointerId);
+  };
+
+  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragState.current) return;
+    const el = event.currentTarget;
+    const delta = event.clientX - dragState.current.startX;
+    el.scrollLeft = dragState.current.scrollLeft - delta;
+  };
+
+  const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    dragState.current = null;
+    setIsDragging(false);
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+  };
 
   const card = (
       <div className={`overflow-hidden bg-background shadow-2xl ring-1 ring-border ${embedded ? "rounded-b-md rounded-t-none" : "rounded-md"}`}>
@@ -201,37 +244,74 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
               {[...new Set(matches.map((t) => t.brand))].map((b) => <label key={b} className="mt-3 flex items-center gap-2"><input type="checkbox" className="accent-primary" checked={brandFilter.includes(b)} onChange={(e) => setBrandFilter(e.target.checked ? [...brandFilter, b] : brandFilter.filter((x) => x !== b))} /> {b}<span className="ml-auto text-xs text-muted-foreground">{matches.filter((t) => t.brand === b).length}</span></label>)}</div>
           </aside>
           {shown.length ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {shown.map((t) => {
-                const off = Math.round((1 - t.price / t.list) * 100);
-                const detail = toTireDetail(t);
-                return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                  <div className="relative"><span className="absolute left-0 top-0 rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
-                    <div className="flex h-6 items-center justify-center">
-                      {BRAND_LOGOS[t.brand]
-                        ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-5 max-w-28 object-contain" />
-                        : <span className="text-xs font-black italic text-primary">{t.brand}</span>}
+            <div className="relative">
+              <div className="absolute -left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
+                <button type="button" aria-label="Anterior" onClick={() => scrollCarousel(-1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronLeft className="size-4" /></button>
+              </div>
+              <div className="absolute -right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
+                <button type="button" aria-label="Siguiente" onClick={() => scrollCarousel(1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronRight className="size-4" /></button>
+              </div>
+              <div
+                ref={carouselRef}
+                className="flex gap-4 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3"
+                style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch", touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerLeave={onPointerUp}
+                onPointerCancel={onPointerUp}
+                onScroll={handleCarouselScroll}
+              >
+                {shown.map((t) => {
+                  const off = Math.round((1 - t.price / t.list) * 100);
+                  const detail = toTireDetail(t);
+                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex min-w-[78%] max-w-[78%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-4 text-center shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                    <div className="relative rounded-lg bg-muted/40 p-3"><span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
+                      <div className="flex h-6 items-center justify-center">
+                        {BRAND_LOGOS[t.brand]
+                          ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-5 max-w-28 object-contain" />
+                          : <span className="text-xs font-black italic text-primary">{t.brand}</span>}
+                      </div>
+                      <div className="relative mx-auto mt-2 w-44 sm:w-full">
+                        <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" />
+                        <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button>
+                      </div></div>
+                    <div className="mt-4 flex min-h-[156px] flex-col">
+                      <h3 className="font-black uppercase leading-tight">{t.brand} {t.model}</h3>
+                      <p className="mt-1 text-sm font-bold text-muted-foreground">{t.size} · {t.load}</p>
+                      <p className="mt-2 text-sm text-muted-foreground line-through">{money(t.list)}</p>
+                      <p className="text-2xl font-black tracking-tight text-primary">{money(t.price)}</p>
+                      <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
+                      <p className={`mt-2 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
                     </div>
-                    <div className="relative mx-auto mt-2 w-44">
-                      <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" />
-                      <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button>
-                    </div></div>
-                  <h3 className="mt-3 font-black uppercase">{t.brand} {t.model}</h3>
-                  <p className="text-sm font-bold">{t.size} {t.load}</p>
-                  <p className="mt-2 text-sm text-muted-foreground line-through">{money(t.list)}</p>
-                  <p className="text-xl font-black text-primary">{money(t.price)}</p>
-                  <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
-                  <p className={`mt-1 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
-                  <Button variant="dark" className="mt-4" onClick={(event) => { event.stopPropagation(); onAddToCart({
-                    id: `tire-${t.brand}-${t.model}-${t.size}`,
-                    name: `${t.brand} ${t.model}`,
-                    category: "Llanta",
-                    detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`,
-                    price: t.price,
-                    image: tireImg,
-                  }); }}><ShoppingCart /> {t.stock ? "Añadir al carrito" : "Cotizar"}</Button>
-                </article>;
-              })}
+                    <Button variant="dark" className="mt-auto w-full" onClick={(event) => { event.stopPropagation(); onAddToCart({
+                      id: `tire-${t.brand}-${t.model}-${t.size}`,
+                      name: `${t.brand} ${t.model}`,
+                      category: "Llanta",
+                      detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`,
+                      price: t.price,
+                      image: tireImg,
+                    }); }}><ShoppingCart /> {t.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+                  </article>;
+                })}
+              </div>
+              <div className="mt-4 flex items-center justify-center gap-2 md:hidden">
+                {shown.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`Ir a tarjeta ${index + 1}`}
+                    onClick={() => {
+                      const el = carouselRef.current;
+                      if (!el) return;
+                      const card = el.querySelectorAll("article")[index];
+                      card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+                      setActiveSlide(index);
+                    }}
+                    className={`h-2.5 rounded-full transition-all ${index === activeSlide ? "w-8 bg-primary" : "w-2.5 bg-border"}`}
+                  />
+                ))}
+              </div>
             </div>
           ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay llantas con esos filtros. Escríbenos por WhatsApp y la conseguimos.</p>}
         </div>
