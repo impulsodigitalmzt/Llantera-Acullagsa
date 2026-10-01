@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { BatteryCharging, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductDetailDialog, type ProductDetailProduct } from "@/components/ProductDetailDialog";
+import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { BATTERY_CATALOG, VEHICLES, YEARS, money, shocksForVehicle } from "@/data/catalog";
 import type { CartItem } from "@/components/ShoppingCart";
 
@@ -38,6 +38,7 @@ const CONFIG: Record<Category, {
 export function ProductFinder({ category, onAddToCart }: {
   category: Category;
   onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  onOpenProduct: (product: ProductDetailProduct, products: ProductDetailProduct[]) => void;
 }) {
   const cfg = CONFIG[category];
   const Icon = cfg.icon;
@@ -50,7 +51,6 @@ export function ProductFinder({ category, onAddToCart }: {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("relevance");
-  const [selectedProduct, setSelectedProduct] = useState<ProductDetailProduct | null>(null);
 
   const canSearch = make && model && year;
   const resultId = `resultados-${category}`;
@@ -138,10 +138,6 @@ export function ProductFinder({ category, onAddToCart }: {
     .sort((a, b) => sort === "asc" ? a.price - b.price : sort === "desc" ? b.price - a.price : Number(b.stock) - Number(a.stock)),
   [products, brandFilter, onlyStock, minPrice, maxPrice, sort]);
   const brands = [...new Set(products.map((product) => product.brand))];
-  const relatedProducts = selectedProduct
-    ? products.filter((product) => product.id !== selectedProduct.id)
-      .sort((a, b) => Number(b.brand === selectedProduct.brand) - Number(a.brand === selectedProduct.brand))
-    : [];
 
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
@@ -184,7 +180,7 @@ export function ProductFinder({ category, onAddToCart }: {
             {shownProducts.map((product) => {
               const discount = Math.round((1 - product.price / product.list) * 100);
               const detailProduct: ProductDetailProduct = product;
-              return <article key={product.id} role="button" tabIndex={0} onClick={() => setSelectedProduct(detailProduct)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedProduct(detailProduct); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}</div>
                 <p className="mt-2 text-xs font-black italic text-primary">{product.brand}</p>
                 <h5 className="mt-1 font-black uppercase">{product.name}</h5>
@@ -193,13 +189,12 @@ export function ProductFinder({ category, onAddToCart }: {
                 <p className="text-xl font-black text-primary">{money(product.price)}</p>
                 <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
                 <p className={`mt-1 text-xs font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
-                <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); setSelectedProduct(detailProduct); }}><Eye /> Vista rápida</Button>
+                <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); onOpenProduct(detailProduct, products); }}><Eye /> Ver detalles</Button>
                 <Button variant="dark" className="mt-2" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
               </article>;
             })}
           </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
         </div>
-        <ProductDetailDialog product={selectedProduct} relatedProducts={relatedProducts} onSelectProduct={setSelectedProduct} onAddToCart={onAddToCart} />
       </section>
     )}
   </>;

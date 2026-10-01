@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BatteryCharging,
   CarFront,
@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TireFinder } from "@/components/TireFinder";
 import { ProductFinder } from "@/components/ProductFinder";
+import { ProductDetailPage, type ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { ShoppingCart, type CartItem } from "@/components/ShoppingCart";
 
 export const Route = createFileRoute("/")({
@@ -162,7 +163,12 @@ function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
   </>;
 }
 
-function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void }) {
+type ProductSelection = { product: ProductDetailProduct; products: ProductDetailProduct[] };
+
+function CatalogHub({ onAddToCart, onOpenProduct }: {
+  onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  onOpenProduct: (product: ProductDetailProduct, products: ProductDetailProduct[]) => void;
+}) {
   const [tab, setTab] = useState<CatalogTab>("llantas");
 
   useEffect(() => {
@@ -224,7 +230,7 @@ function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quant
 
       {tab === "llantas" && (
         <div role="tabpanel" id="panel-llantas" aria-labelledby="tab-llantas">
-          <TireFinder variant="hero" embedded onAddToCart={onAddToCart} />
+          <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
         </div>
       )}
 
@@ -241,7 +247,7 @@ function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quant
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Una solución para cada vehículo, respaldada por asesoría especializada.</p>
           </div>
           <div className="mt-6">
-            <ProductFinder category="acumuladores" onAddToCart={onAddToCart} />
+            <ProductFinder category="acumuladores" onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
           </div>
         </div>
       )}
@@ -259,7 +265,7 @@ function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quant
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.</p>
           </div>
           <div className="mt-8">
-            <ProductFinder category="amortiguadores" onAddToCart={onAddToCart} />
+            <ProductFinder category="amortiguadores" onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
           </div>
         </div>
       )}
@@ -268,6 +274,8 @@ function CatalogHub({ onAddToCart }: { onAddToCart: (item: Omit<CartItem, "quant
 }
 
 function Index() {
+  const [productSelection, setProductSelection] = useState<ProductSelection | null>(null);
+  const catalogScrollPosition = useRef(0);
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -315,26 +323,40 @@ function Index() {
       : items.map((item) => item.id === id ? { ...item, quantity } : item));
   };
 
+  const openProduct = (product: ProductDetailProduct, products: ProductDetailProduct[]) => {
+    catalogScrollPosition.current = window.scrollY;
+    window.scrollTo(0, 0);
+    setProductSelection({ product, products });
+  };
+
+  const closeProduct = () => {
+    setProductSelection(null);
+    window.requestAnimationFrame(() => window.scrollTo(0, catalogScrollPosition.current));
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header cartCount={cartCount} onOpenCart={() => setCartOpen(true)} />
       <main>
-        <section id="inicio" className="relative overflow-hidden bg-brand-ink">
-          <img src="https://via.placeholder.com/1600x900?text=Hero" width={1600} height={900} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover object-[66%_center] opacity-25" />
-          <div className="absolute inset-0 bg-hero-overlay" />
-          <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-14" />
-        </section>
-        <CatalogHub onAddToCart={addToCart} />
+        <div className={productSelection ? "hidden" : undefined}>
+          <section id="inicio" className="relative overflow-hidden bg-brand-ink">
+            <img src="https://via.placeholder.com/1600x900?text=Hero" width={1600} height={900} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover object-[66%_center] opacity-25" />
+            <div className="absolute inset-0 bg-hero-overlay" />
+            <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-14" />
+          </section>
+          <CatalogHub onAddToCart={addToCart} onOpenProduct={openProduct} />
 
-        <section id="servicios" className="bg-brand-ink py-20 text-primary-foreground"><div className="mx-auto max-w-6xl px-4"><div className="max-w-3xl"><p className="text-xs font-bold uppercase text-primary">Centro de servicio LTH</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">No solo vendemos.<br/>Te ponemos en marcha.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-primary-foreground/70">Contamos con equipo y personal capacitado para diagnosticar, instalar y cuidar tu vehículo con procesos confiables.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{serviceItems.map(([Icon, label]) => <div key={label} className="flex items-center gap-3 border-b border-primary-foreground/15 pb-4 text-sm font-bold"><Icon className="size-5 text-primary" />{label}</div>)}</div><Button asChild size="xl" variant="hero" className="mt-8"><a href="tel:6699855424"><Phone /> Cotizar servicio</a></Button></div></div></section>
+          <section id="servicios" className="bg-brand-ink py-20 text-primary-foreground"><div className="mx-auto max-w-6xl px-4"><div className="max-w-3xl"><p className="text-xs font-bold uppercase text-primary">Centro de servicio LTH</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">No solo vendemos.<br/>Te ponemos en marcha.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-primary-foreground/70">Contamos con equipo y personal capacitado para diagnosticar, instalar y cuidar tu vehículo con procesos confiables.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{serviceItems.map(([Icon, label]) => <div key={label} className="flex items-center gap-3 border-b border-primary-foreground/15 pb-4 text-sm font-bold"><Icon className="size-5 text-primary" />{label}</div>)}</div><Button asChild size="xl" variant="hero" className="mt-8"><a href="tel:6699855424"><Phone /> Cotizar servicio</a></Button></div></div></section>
 
-        <Brands />
+          <Brands />
 
-        <section id="nosotros" className="mx-auto max-w-6xl px-4 py-20"><div className="text-center"><p className="text-xs font-bold uppercase text-primary">¿Por qué Acullagsa?</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Confianza que sí responde.</h2></div><div className="mt-12 grid gap-8 md:grid-cols-3">{benefits.map(([Icon,title,text]) => <div key={title} className="border-t-2 border-primary pt-6"><Icon className="size-9 text-primary" /><h3 className="mt-5 text-lg font-black">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{text}</p></div>)}</div></section>
+          <section id="nosotros" className="mx-auto max-w-6xl px-4 py-20"><div className="text-center"><p className="text-xs font-bold uppercase text-primary">¿Por qué Acullagsa?</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Confianza que sí responde.</h2></div><div className="mt-12 grid gap-8 md:grid-cols-3">{benefits.map(([Icon,title,text]) => <div key={title} className="border-t-2 border-primary pt-6"><Icon className="size-9 text-primary" /><h3 className="mt-5 text-lg font-black">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{text}</p></div>)}</div></section>
 
-        <section id="contacto" className="bg-primary py-14 text-primary-foreground"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 md:flex-row md:items-center"><div><p className="text-xs font-bold uppercase">Atención rápida en Mazatlán</p><h2 className="mt-2 text-3xl font-black">¿Tu vehículo no enciende?</h2><p className="mt-2 text-sm text-primary-foreground/80">Escríbenos y te ayudamos a encontrar la batería correcta.</p></div><div className="flex flex-wrap gap-3"><Button asChild size="xl" variant="dark"><a href="https://wa.me/526699402253" target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button><Button asChild size="xl" variant="heroOutline"><a href="tel:6699404388"><Phone /> 669 940 4388</a></Button></div></div></section>
+          <section id="contacto" className="bg-primary py-14 text-primary-foreground"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 md:flex-row md:items-center"><div><p className="text-xs font-bold uppercase">Atención rápida en Mazatlán</p><h2 className="mt-2 text-3xl font-black">¿Tu vehículo no enciende?</h2><p className="mt-2 text-sm text-primary-foreground/80">Escríbenos y te ayudamos a encontrar la batería correcta.</p></div><div className="flex flex-wrap gap-3"><Button asChild size="xl" variant="dark"><a href="https://wa.me/526699402253" target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button><Button asChild size="xl" variant="heroOutline"><a href="tel:6699404388"><Phone /> 669 940 4388</a></Button></div></div></section>
+        </div>
+        {productSelection && <ProductDetailPage product={productSelection.product} products={productSelection.products} onBack={closeProduct} onSelectProduct={(product) => setProductSelection((selection) => selection ? { ...selection, product } : selection)} onAddToCart={addToCart} />}
       </main>
-      <footer className="bg-brand-ink py-12 text-primary-foreground">
+      {!productSelection && <footer className="bg-brand-ink py-12 text-primary-foreground">
         <div className="mx-auto grid max-w-6xl gap-9 px-4 md:grid-cols-[1.2fr_1fr_1fr]">
           <div>
             <BrandLogo inverted />
@@ -358,7 +380,7 @@ function Index() {
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-6xl border-t border-primary-foreground/10 px-4 pt-6 text-[11px] text-primary-foreground/40">© 2026 Acullagsa. Todos los derechos reservados.</div>
-      </footer>
+      </footer>}
       <a href="https://wa.me/526699402253" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp" className="fixed bottom-5 right-5 z-50 flex size-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105"><MessageCircle className="size-6" /></a>
       <ShoppingCart
         items={cartItems}

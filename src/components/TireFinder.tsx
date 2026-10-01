@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { CarFront, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductDetailDialog, type ProductDetailProduct } from "@/components/ProductDetailDialog";
+import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
 import tireImg from "@/assets/tire.jpg";
 import type { CartItem } from "@/components/ShoppingCart";
 
@@ -10,6 +10,10 @@ type Tire = { brand: string; model: string; size: string; load: string; price: n
 function toTireDetail(tire: Tire): ProductDetailProduct {
   const id = `tire-${tire.brand}-${tire.model}-${tire.size}`;
   const stockCount = tire.stock ? 6 + hash(`${tire.brand}${tire.size}`) % 18 : 0;
+  const [, dimensions = ""] = tire.size.split("/");
+  const [profile = "", rim = ""] = dimensions.split("R");
+  const loadIndex = tire.load.slice(0, -1);
+  const speedRating = tire.load.slice(-1);
   return {
     id,
     name: `${tire.brand} ${tire.model}`,
@@ -19,13 +23,18 @@ function toTireDetail(tire: Tire): ProductDetailProduct {
     price: tire.price,
     stockCount,
     gallery: [tireImg],
-    description: `Llanta ${tire.brand} ${tire.model} en medida ${tire.size}, diseñada para ofrecer desempeño y agarre confiables. Verifica la compatibilidad con las especificaciones de tu vehículo antes de instalar.`,
+    description: `Llanta ${tire.brand} ${tire.model} en medida ${tire.size}. Cuenta con construcción radial, ancho de sección de ${tire.size.split("/")[0]} mm, relación de aspecto ${profile} y diámetro de rin de ${rim} pulgadas. Su índice de carga es ${loadIndex} y el código de velocidad es ${speedRating}. Se vende por unidad. Antes de instalarla, confirma que la medida y los índices coincidan con la etiqueta o el manual de tu vehículo; presión, capacidad y aplicación dependen de la configuración del vehículo.`,
     specifications: [
       { label: "Medida", value: tire.size },
-      { label: "Índice de carga", value: tire.load.slice(0, -1) },
-      { label: "Código de velocidad", value: tire.load.slice(-1) },
+      { label: "Ancho de sección", value: `${tire.size.split("/")[0]} mm` },
+      { label: "Relación de aspecto", value: profile },
+      { label: "Diámetro del rin", value: `${rim} pulgadas` },
+      { label: "Índice de carga", value: loadIndex },
+      { label: "Índice de velocidad", value: speedRating },
       { label: "Construcción", value: "Radial" },
-      { label: "Rin", value: tire.size.split("R")[1] ?? "Consultar" },
+      { label: "Cantidad de llantas", value: "1" },
+      { label: "Tipo de servicio", value: "Consultar aplicación" },
+      { label: "Tipo de terreno", value: tire.model.toUpperCase().includes("AT") ? "Todo terreno (A/T)" : "Carretera" },
       { label: "Disponibilidad", value: stockCount ? `${stockCount} unidades` : "Sobre pedido" },
     ],
     cartItem: {
@@ -78,10 +87,11 @@ const parse = (s: string) => { const [w = "", rest = ""] = s.split("/"); const [
 const uniq = (a: string[]) => [...new Set(a)].sort((x, y) => Number(x) - Number(y));
 const money = (n: number) => `$ ${n.toLocaleString("es-MX")}.00`;
 
-export function TireFinder({ variant = "card", embedded = false, onAddToCart }: {
+export function TireFinder({ variant = "card", embedded = false, onAddToCart, onOpenProduct }: {
   variant?: "hero" | "card";
   embedded?: boolean;
   onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  onOpenProduct: (product: ProductDetailProduct, products: ProductDetailProduct[]) => void;
 }) {
   const [mode, setMode] = useState<"size" | "vehicle">("size");
   const [w, setW] = useState(""); const [p, setP] = useState(""); const [r, setR] = useState("");
@@ -92,7 +102,6 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
   const [sort, setSort] = useState("relevance");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<ProductDetailProduct | null>(null);
 
   const parsed = SIZES.map(parse);
   const widths = uniq(parsed.map((x) => x.w));
@@ -118,10 +127,6 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
     .filter((t) => !maxPrice || t.price <= Number(maxPrice))
     .sort((a, b) => sort === "asc" ? a.price - b.price : sort === "desc" ? b.price - a.price : Number(b.stock) - Number(a.stock)), [matches, brandFilter, onlyStock, minPrice, maxPrice, sort]);
   const detailProducts = useMemo(() => matches.map(toTireDetail), [matches]);
-  const relatedProducts = selectedProduct
-    ? detailProducts.filter((item) => item.id !== selectedProduct.id)
-      .sort((a, b) => Number(b.brand === selectedProduct.brand) - Number(a.brand === selectedProduct.brand))
-    : [];
 
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
@@ -185,7 +190,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
               {shown.map((t) => {
                 const off = Math.round((1 - t.price / t.list) * 100);
                 const detail = toTireDetail(t);
-                return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => setSelectedProduct(detail)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedProduct(detail); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <div className="relative"><span className="absolute left-0 top-0 rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
                     <p className="text-xs font-black italic text-primary">{t.brand}</p>
                     <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="mx-auto mt-2 aspect-square w-44 object-contain" /></div>
@@ -195,7 +200,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
                   <p className="text-xl font-black text-primary">{money(t.price)}</p>
                   <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
                   <p className={`mt-1 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
-                  <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); setSelectedProduct(detail); }}><Eye /> Vista rápida</Button>
+                  <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); onOpenProduct(detail, detailProducts); }}><Eye /> Ver detalles</Button>
                   <Button variant="dark" className="mt-4" onClick={(event) => { event.stopPropagation(); onAddToCart({
                     id: `tire-${t.brand}-${t.model}-${t.size}`,
                     name: `${t.brand} ${t.model}`,
@@ -209,7 +214,6 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
             </div>
           ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay llantas con esos filtros. Escríbenos por WhatsApp y la conseguimos.</p>}
         </div>
-        <ProductDetailDialog product={selectedProduct} relatedProducts={relatedProducts} onSelectProduct={setSelectedProduct} onAddToCart={onAddToCart} />
       </section>
   ) : null;
 
