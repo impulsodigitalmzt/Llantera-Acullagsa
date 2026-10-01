@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { BatteryCharging, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
+import { ProductQuickView } from "@/components/ProductQuickView";
 import { BATTERY_CATALOG, VEHICLES, YEARS, money, shocksForVehicle } from "@/data/catalog";
 import type { CartItem } from "@/components/ShoppingCart";
 
@@ -51,6 +52,7 @@ export function ProductFinder({ category, onAddToCart }: {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("relevance");
+  const [quickViewProduct, setQuickViewProduct] = useState<ProductDetailProduct | null>(null);
 
   const canSearch = make && model && year;
   const resultId = `resultados-${category}`;
@@ -194,7 +196,7 @@ export function ProductFinder({ category, onAddToCart }: {
               const discount = Math.round((1 - product.price / product.list) * 100);
               const detailProduct: ProductDetailProduct = product;
               return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); onOpenProduct(detailProduct, products); }}><Eye /> Vista rápida</Button></div>
+                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
                 <p className="mt-2 text-xs font-black italic text-primary">{product.brand}</p>
                 <h5 className="mt-1 font-black uppercase">{product.name}</h5>
                 <p className="text-sm font-bold">{product.detail}</p>
@@ -209,5 +211,6 @@ export function ProductFinder({ category, onAddToCart }: {
         </div>
       </section>
     )}
+    <ProductQuickView product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAddToCart={onAddToCart} />
   </>;
 }

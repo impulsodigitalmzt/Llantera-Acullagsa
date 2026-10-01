@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { CarFront, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
+import { ProductQuickView } from "@/components/ProductQuickView";
 import tireImg from "@/assets/tire.jpg";
 import type { CartItem } from "@/components/ShoppingCart";
 
@@ -56,6 +57,12 @@ function toTireDetail(tire: Tire): ProductDetailProduct {
 }
 
 const BRANDS = ["GOODYEAR", "TORNEL", "JK TYRE", "TOLEDO TYRES", "EUZKADI", "GENERAL TIRE"];
+const BRAND_LOGOS: Record<string, string> = {
+  GOODYEAR: "/marcas/goodyear.png",
+  TORNEL: "/marcas/tornel.png",
+  "JK TYRE": "/marcas/jktyre.png",
+  "TOLEDO TYRES": "/marcas/toledo.png",
+};
 const MODELS: Record<string, string[]> = {
   GOODYEAR: ["Assurance Maxlife", "EfficientGrip", "Wrangler Workhorse"],
   TORNEL: ["Real", "Astral", "AT-09"],
@@ -109,6 +116,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
   const [sort, setSort] = useState("relevance");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [quickViewProduct, setQuickViewProduct] = useState<ProductDetailProduct | null>(null);
 
   const parsed = SIZES.map(parse);
   const widths = uniq(parsed.map((x) => x.w));
@@ -199,10 +207,14 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                 const detail = toTireDetail(t);
                 return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <div className="relative"><span className="absolute left-0 top-0 rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
-                    <p className="text-xs font-black italic text-primary">{t.brand}</p>
+                    <div className="flex h-6 items-center justify-center">
+                      {BRAND_LOGOS[t.brand]
+                        ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-5 max-w-28 object-contain" />
+                        : <span className="text-xs font-black italic text-primary">{t.brand}</span>}
+                    </div>
                     <div className="relative mx-auto mt-2 w-44">
                       <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" />
-                      <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); onOpenProduct(detail, detailProducts); }}><Eye /> Vista rápida</Button>
+                      <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button>
                     </div></div>
                   <h3 className="mt-3 font-black uppercase">{t.brand} {t.model}</h3>
                   <p className="text-sm font-bold">{t.size} {t.load}</p>
@@ -226,12 +238,13 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
       </section>
   ) : null;
 
-  if (embedded) return <>{card}{results}</>;
+  if (embedded) return <>{card}{results}<ProductQuickView product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAddToCart={onAddToCart} /></>;
 
   return <>
     <div id="buscador" className={`relative z-10 mx-auto max-w-6xl scroll-mt-28 px-4 ${variant === "hero" ? "-mt-24 sm:-mt-28" : "-mt-20"}`}>
       {card}
     </div>
     {results}
+    <ProductQuickView product={quickViewProduct} onClose={() => setQuickViewProduct(null)} onAddToCart={onAddToCart} />
   </>;
 }
