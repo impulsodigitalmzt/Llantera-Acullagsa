@@ -159,6 +159,7 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
   const formGrid = "mt-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
   const [isDragging, setIsDragging] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
@@ -227,8 +228,8 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
             <label className="flex items-center gap-2 font-semibold">Ordenar por<select aria-label="Ordenar productos" value={sort} onChange={(event) => setSort(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3"><option value="relevance">Relevancia</option><option value="asc">Precio, menor a mayor</option><option value="desc">Precio, mayor a menor</option></select></label>
           </div>
         </div>
-        <div className="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
-          <aside className="rounded-xl border border-border bg-muted/20 p-3 text-sm shadow-sm lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:pr-6">
+        <div className="mt-4 lg:mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
+          <aside className="hidden lg:block lg:rounded-xl lg:border lg:border-border lg:bg-muted/20 lg:p-3 lg:text-sm lg:shadow-sm lg:pr-6">
             <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
               <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-foreground"><SlidersHorizontal className="size-3.5" /> Filtros</p>
               <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-bold text-muted-foreground">{products.length}</span>
@@ -248,6 +249,29 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
               </div>
             </div>
           </aside>
+          <div className="lg:hidden">
+            <div className="relative mb-3 flex items-center justify-end">
+              <button type="button" aria-label="Abrir filtros" onClick={() => setIsFilterOpen((open) => !open)} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-foreground shadow-sm"><SlidersHorizontal className="size-3.5" /> Filtros</button>
+            </div>
+            {isFilterOpen && (
+              <div className="mb-4 rounded-xl border border-border bg-muted/20 p-3 shadow-sm">
+                <div className="space-y-3">
+                  <div>
+                    <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Disponibilidad</p>
+                    <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} className="accent-primary" /> En existencia<span className="ml-auto text-xs text-muted-foreground">{products.filter((product) => product.stock).length}</span></label>
+                  </div>
+                  <div>
+                    <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Precio</p>
+                    <div className="mt-2 grid grid-cols-2 gap-2"><label className="text-[11px] text-muted-foreground">Mínimo<input type="number" min="0" inputMode="numeric" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder="$0" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label><label className="text-[11px] text-muted-foreground">Máximo<input type="number" min="0" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Sin límite" className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground" /></label></div>
+                  </div>
+                  <div>
+                    <p className="border-b border-border pb-2 text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">Marca</p>
+                    <div className="mt-2 space-y-2">{brands.map((brand) => <label key={brand} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={brandFilter.includes(brand)} onChange={(event) => setBrandFilter(event.target.checked ? [...brandFilter, brand] : brandFilter.filter((selected) => selected !== brand))} className="accent-primary" /> {brand}<span className="ml-auto text-xs text-muted-foreground">{products.filter((product) => product.brand === brand).length}</span></label>)}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           {shownProducts.length ? <div className="relative">
             <div className="absolute -left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
               <button type="button" aria-label="Anterior" onClick={() => scrollCarousel(-1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronLeft className="size-4" /></button>
@@ -255,52 +279,18 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
             <div className="absolute -right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
               <button type="button" aria-label="Siguiente" onClick={() => scrollCarousel(1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronRight className="size-4" /></button>
             </div>
-            <div
-              ref={carouselRef}
-              className="flex gap-4 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3"
-              style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch", touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerLeave={onPointerUp}
-              onPointerCancel={onPointerUp}
-              onScroll={handleCarouselScroll}
-            >
+            <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch", touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp} onPointerCancel={onPointerUp} onScroll={handleCarouselScroll}>
             {shownProducts.map((product) => {
               const discount = Math.round((1 - product.price / product.list) * 100);
               const detailProduct: ProductDetailProduct = product;
-              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex min-w-[78%] max-w-[78%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-3 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
-                <div className="relative flex aspect-square items-center justify-center rounded-lg bg-muted/40 p-2.5"><span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
-                <div className="mt-3 flex min-h-[128px] flex-col">
-                  <p className="text-xs font-black italic text-primary">{product.brand}</p>
-                  <h5 className="mt-1 font-black uppercase leading-tight">{product.name}</h5>
-                  <p className="mt-1 text-sm font-bold text-muted-foreground">{product.detail}</p>
-                  <p className="mt-2 text-sm text-muted-foreground line-through">{money(product.list)}</p>
-                  <p className="text-xl font-black tracking-tight text-primary">{money(product.price)}</p>
-                  <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
-                  <p className={`mt-1 text-[11px] font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
-                </div>
-                <Button variant="dark" className="mt-auto h-10 w-full text-xs" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir" : "Cotizar"}</Button>
+              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex min-w-[62%] max-w-[62%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                <div className="relative flex aspect-square items-center justify-center rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
+                <div className="mt-2 flex min-h-[105px] flex-col"><p className="text-[10px] font-black italic text-primary">{product.brand}</p><h5 className="mt-1 font-black uppercase leading-tight text-[11px]">{product.name}</h5><p className="mt-1 text-[10px] font-bold text-muted-foreground">{product.detail}</p><p className="mt-1 text-[10px] text-muted-foreground line-through">{money(product.list)}</p><p className="text-lg font-black tracking-tight text-primary">{money(product.price)}</p><p className="text-[9px] text-muted-foreground">IVA incluido</p><p className={`mt-1 text-[10px] font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p></div>
+                <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart className="size-3.5" /> {product.stock ? "Añadir" : "Cotizar"}</Button>
               </article>;
             })}
             </div>
-            <div className="mt-3 flex items-center justify-center gap-2 md:hidden">
-              {shownProducts.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  aria-label={`Ir al producto ${index + 1}`}
-                  onClick={() => {
-                    const el = carouselRef.current;
-                    if (!el) return;
-                    const card = el.querySelectorAll("article")[index];
-                    card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-                    setActiveSlide(index);
-                  }}
-                  className={`h-2 rounded-full transition-all ${index === activeSlide ? "w-7 bg-primary" : "w-2 bg-border"}`}
-                />
-              ))}
-            </div>
+            <div className="mt-3 flex items-center justify-center gap-2 md:hidden">{shownProducts.map((_, index) => <button key={index} type="button" aria-label={`Ir al producto ${index + 1}`} onClick={() => { const el = carouselRef.current; if (!el) return; const card = el.querySelectorAll("article")[index]; card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" }); setActiveSlide(index); }} className={`h-2 rounded-full transition-all ${index === activeSlide ? "w-7 bg-primary" : "w-2 bg-border"}`} />)}</div>
           </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
         </div>
       </section>
