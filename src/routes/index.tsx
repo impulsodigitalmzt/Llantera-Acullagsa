@@ -312,7 +312,7 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
       <div
         role="tablist"
         aria-label="Categorías de producto"
-        className="grid grid-cols-3 overflow-hidden rounded-t-md bg-brand-ink shadow-2xl ring-1 ring-border"
+        className="sticky top-20 z-30 grid grid-cols-3 overflow-hidden rounded-t-md bg-brand-ink shadow-2xl ring-1 ring-border"
       >
         {catalogTabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
