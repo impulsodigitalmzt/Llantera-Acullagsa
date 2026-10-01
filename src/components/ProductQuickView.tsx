@@ -23,7 +23,7 @@ const money = (amount: number) => `$ ${amount.toLocaleString("es-MX", { minimumF
 export function ProductQuickView({ product, onClose, onAddToCart }: ProductQuickViewProps) {
   return (
     <Dialog open={product !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
-      {product && <DialogContent className="grid w-[calc(100vw-2rem)] max-w-2xl grid-cols-1 items-center gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-6">
+      {product && <DialogContent className="grid max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-2xl grid-cols-1 items-center gap-5 overflow-y-auto p-5 sm:grid-cols-2 sm:gap-6 sm:p-6">
         <div className="flex aspect-square items-center justify-center bg-muted/40 p-3 sm:p-4">
           {product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}
         </div>

@@ -143,9 +143,9 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
     .sort((a, b) => sort === "asc" ? a.price - b.price : sort === "desc" ? b.price - a.price : Number(b.stock) - Number(a.stock)), [matches, brandFilter, onlyStock, minPrice, maxPrice, sort]);
   const detailProducts = useMemo(() => matches.map(toTireDetail), [matches]);
 
-  const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
+  const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 sm:px-3 sm:text-sm";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
-  const formGrid = "mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
+  const formGrid = "mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
 
   const card = (
@@ -165,14 +165,14 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                 <label className={field}>Ancho<select className={sel} value={w} onChange={(e) => { setW(e.target.value); setP(""); setR(""); }}><option value="">Ancho</option>{widths.map((x) => <option key={x}>{x}</option>)}</select></label>
                 <label className={field}>Perfil<select className={sel} disabled={!w} value={p} onChange={(e) => { setP(e.target.value); setR(""); }}><option value="">Perfil</option>{profiles.map((x) => <option key={x}>{x}</option>)}</select></label>
                 <label className={field}>Rin<select className={sel} disabled={!p} value={r} onChange={(e) => setR(e.target.value)}><option value="">Rin</option>{rins.map((x) => <option key={x} value={x}>R{x}</option>)}</select></label>
-                <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap px-3" onClick={search}><Search /> Ver llantas</Button>
+                <Button size="xl" variant="hero" disabled={!canSearch} className="col-span-3 h-12 w-full self-end justify-center whitespace-nowrap px-3 lg:col-span-1" onClick={search}><Search /> Ver llantas</Button>
               </div>
             ) : (
               <div className={formGrid}>
                 <label className={field}>Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
                 <label className={field}>Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
                 <label className={field}>Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
-                <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap px-3" onClick={search}><Search /> Ver llantas</Button>
+                <Button size="xl" variant="hero" disabled={!canSearch} className="col-span-3 h-12 w-full self-end justify-center whitespace-nowrap px-3 lg:col-span-1" onClick={search}><Search /> Ver llantas</Button>
               </div>
             )}
           </div>

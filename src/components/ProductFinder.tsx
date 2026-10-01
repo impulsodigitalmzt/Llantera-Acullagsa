@@ -154,9 +154,9 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
   [products, brandFilter, onlyStock, minPrice, maxPrice, sort]);
   const brands = [...new Set(products.map((product) => product.brand))];
 
-  const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
+  const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 sm:px-3 sm:text-sm";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
-  const formGrid = "mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
+  const formGrid = "mt-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
 
   return <>
     <div className="overflow-hidden rounded-md bg-background shadow-xl ring-1 ring-border">
@@ -167,7 +167,7 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
           <label className={field}>Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
           <label className={field}>Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
           <label className={field}>Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
-          <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> {cfg.button}</Button>
+          <Button size="xl" variant="hero" disabled={!canSearch} className="col-span-3 h-12 w-full self-end justify-center whitespace-nowrap lg:col-span-1" onClick={search}><Search /> {cfg.button}</Button>
         </div>
       </div>
     </div>

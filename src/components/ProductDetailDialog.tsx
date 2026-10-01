@@ -51,8 +51,9 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
         <button type="button" onClick={onBack} className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Volver al catálogo</button>
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_310px]">
-          <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,1.25fr)_minmax(260px,0.9fr)]">
-            <section className="grid min-w-0 gap-3 md:grid-cols-[64px_minmax(0,1fr)]" aria-label="Galería del producto">
+          <div className="min-w-0">
+            <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,1.25fr)_minmax(260px,0.9fr)]">
+              <section className="grid min-w-0 gap-3 md:grid-cols-[64px_minmax(0,1fr)]" aria-label="Galería del producto">
               <div className="order-2 flex gap-2 overflow-x-auto pb-1 md:order-1 md:flex-col md:overflow-x-visible" aria-label="Imágenes del producto">
                 {product.gallery.length ? product.gallery.map((src, index) => (
                   <button key={`${src}-${index}`} type="button" aria-label={`Ver imagen ${index + 1} de ${product.name}`} aria-pressed={imageIndex === index} onClick={() => { setImageIndex(index); setZoomed(false); }} className={`flex size-14 shrink-0 items-center justify-center border p-1 sm:size-16 ${imageIndex === index ? "border-primary" : "border-border"}`}>
@@ -68,9 +69,9 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
                   {zoomed ? <ZoomOut className="size-4" /> : <ZoomIn className="size-4" />}
                 </button>
               </div>
-            </section>
+              </section>
 
-            <section className="min-w-0">
+              <section className="min-w-0">
               <p className="text-xs font-bold uppercase text-primary">{product.category} · {product.brand}</p>
               {product.isBestSeller && <span className="mt-3 inline-flex bg-primary px-2 py-1 text-[11px] font-black uppercase text-primary-foreground">Más vendido</span>}
               <h1 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">{product.name}</h1>
@@ -80,12 +81,13 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
                 {product.specifications.slice(0, 5).map(({ label, value }) => <li key={label}><span className="font-semibold text-foreground">{label}:</span> {value}</li>)}
               </ul>
               <button type="button" onClick={() => document.getElementById("caracteristicas-producto")?.scrollIntoView({ behavior: "smooth" })} className="mt-4 text-sm font-semibold text-primary hover:underline">Ver todas las características</button>
+              </section>
+            </div>
+            <section className="mt-6 border-t border-border pt-5" aria-labelledby="descripcion-producto">
+              <h2 id="descripcion-producto" className="text-xl font-black">Descripción</h2>
+              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.description}</p>
             </section>
           </div>
-          <section className="mt-1 border-t border-border pt-5" aria-labelledby="descripcion-producto">
-            <h2 id="descripcion-producto" className="text-xl font-black">Descripción</h2>
-            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.description}</p>
-          </section>
 
           <aside className="h-fit border border-border p-5">
             <p className="text-3xl font-black text-primary">{money(product.price)}</p>
