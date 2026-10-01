@@ -85,13 +85,19 @@ export function ProductFinder({ category, onAddToCart }: {
       stockCount: battery.stock ? 5 + battery.cca % 16 : 0,
       image: `/acumuladores/${BATTERY_IMAGES[battery.line]}`,
       gallery: [`/acumuladores/${BATTERY_IMAGES[battery.line]}`],
-      description: `Acumulador LTH ${battery.line} para aplicaciones del grupo ${battery.group}. Su capacidad de arranque en frío es de ${battery.cca} CCA y cuenta con ${battery.warranty} de garantía. Confirma la compatibilidad y posición de bornes con tu vehículo antes de instalar.`,
+      description: [
+        `El acumulador LTH ${battery.line} está listado para vehículos que utilizan el grupo ${battery.group}. En esta búsqueda aparece como compatible con ${result?.make} ${result?.model} ${result?.year}; confirma que la versión y motorización de tu vehículo correspondan antes de realizar el pedido.`,
+        `Su capacidad de arranque en frío indicada es de ${battery.cca} CCA. Este valor describe la capacidad de entregar corriente durante el arranque en condiciones frías; no corresponde a la capacidad en amperios-hora (Ah), dato que no está especificado en este catálogo. La garantía publicada para esta línea es de ${battery.warranty}, sujeta a las condiciones del fabricante.`,
+        `Antes de instalarlo, compara el grupo, las dimensiones de la charola, la orientación de los bornes y el sistema de sujeción con el acumulador que usa el vehículo. La posición y polaridad de terminales deben verificarse físicamente; consulta con un técnico si el vehículo requiere registro electrónico o un procedimiento de instalación especial.`,
+      ].join("\n\n"),
       specifications: [
         { label: "Línea", value: battery.line },
         { label: "Grupo", value: battery.group },
         { label: "Amperaje de arranque (CCA)", value: `${battery.cca} A` },
         { label: "Garantía", value: battery.warranty },
-        { label: "Posición de bornes", value: "Confirmar aplicación" },
+        { label: "Vehículo consultado", value: `${result?.make} ${result?.model} ${result?.year}` },
+        { label: "Polaridad y posición de bornes", value: "Confirmar físicamente" },
+        { label: "Dimensiones", value: "Consultar ficha del fabricante" },
       ],
       cartItem: {
         id: `battery-${battery.group}-${battery.line}`,
@@ -114,12 +120,19 @@ export function ProductFinder({ category, onAddToCart }: {
       stock: shock.stock,
       stockCount: shock.stock ? 3 + (shock.price % 14) : 0,
       gallery: [],
-      description: `Amortiguador ${shock.brand} ${shock.model} para ${result?.make} ${result?.model}, posición ${shock.position.toLowerCase()}. Confirma año, versión y lado de instalación antes de realizar el pedido.`,
+      description: [
+        `Amortiguador ${shock.brand} ${shock.model} para la posición ${shock.position.toLowerCase()}, correspondiente al vehículo ${result?.make} ${result?.model} ${result?.year} seleccionado en la búsqueda. El amortiguador controla el movimiento de la suspensión y ayuda a mantener el contacto de la rueda con el camino durante la marcha.`,
+        `La aplicación se identifica por marca, modelo, año y posición. La publicación corresponde a una pieza; no incluye el par ni otros componentes de suspensión. El lado específico, las dimensiones, el tipo de anclaje y la calibración no vienen desglosados en los datos disponibles, por lo que deben verificarse con el número de parte y la ficha del fabricante.`,
+        `Antes de comprar, compara la aplicación con la versión exacta del vehículo y confirma si necesitas la pieza del lado izquierdo o derecho. Durante el reemplazo, revisa también los soportes y componentes relacionados de la suspensión para detectar desgaste o daños.`,
+      ].join("\n\n"),
       specifications: [
         { label: "Marca", value: shock.brand },
         { label: "Línea", value: shock.model },
         { label: "Posición", value: shock.position },
         { label: "Vehículo", value: `${result?.make} ${result?.model} ${result?.year}` },
+        { label: "Cantidad", value: "1 pieza" },
+        { label: "Lado de montaje", value: "Confirmar con número de parte" },
+        { label: "Dimensiones y anclaje", value: "Consultar ficha del fabricante" },
         { label: "Tipo", value: "Amortiguador de suspensión" },
       ],
       cartItem: {

@@ -12,8 +12,15 @@ function toTireDetail(tire: Tire): ProductDetailProduct {
   const stockCount = tire.stock ? 6 + hash(`${tire.brand}${tire.size}`) % 18 : 0;
   const [, dimensions = ""] = tire.size.split("/");
   const [profile = "", rim = ""] = dimensions.split("R");
+  const sectionWidth = tire.size.split("/")[0] ?? "Consultar";
   const loadIndex = tire.load.slice(0, -1);
   const speedRating = tire.load.slice(-1);
+  const terrain = /\bAT\b|GRABBER/i.test(tire.model) ? "todo terreno (A/T)" : "carretera";
+  const description = [
+    `${tire.brand} ${tire.model} es una llanta radial en medida ${tire.size}, con ancho nominal de sección de ${sectionWidth} mm, relación de aspecto ${profile} y diámetro de rin de ${rim} pulgadas. Esta combinación identifica las dimensiones principales que deben coincidir con las indicadas por el fabricante del vehículo.`,
+    `Su índice de carga es ${loadIndex} y su código de velocidad es ${speedRating}. Estos índices forman parte de la especificación de la llanta y deben compararse con la etiqueta de presión o el manual del vehículo. El modelo se clasifica para uso de ${terrain}; revisa que ese uso corresponda a tus recorridos y a la aplicación recomendada.`,
+    `La publicación corresponde a una unidad. Antes de instalarla, verifica medida, rin, índices, espacio disponible y compatibilidad con las otras llantas del vehículo. La presión correcta y la carga máxima dependen del vehículo y no deben determinarse únicamente con el nombre comercial de la llanta.`,
+  ].join("\n\n");
   return {
     id,
     name: `${tire.brand} ${tire.model}`,
@@ -23,10 +30,10 @@ function toTireDetail(tire: Tire): ProductDetailProduct {
     price: tire.price,
     stockCount,
     gallery: [tireImg],
-    description: `Llanta ${tire.brand} ${tire.model} en medida ${tire.size}. Cuenta con construcción radial, ancho de sección de ${tire.size.split("/")[0]} mm, relación de aspecto ${profile} y diámetro de rin de ${rim} pulgadas. Su índice de carga es ${loadIndex} y el código de velocidad es ${speedRating}. Se vende por unidad. Antes de instalarla, confirma que la medida y los índices coincidan con la etiqueta o el manual de tu vehículo; presión, capacidad y aplicación dependen de la configuración del vehículo.`,
+    description,
     specifications: [
       { label: "Medida", value: tire.size },
-      { label: "Ancho de sección", value: `${tire.size.split("/")[0]} mm` },
+      { label: "Ancho de sección", value: `${sectionWidth} mm` },
       { label: "Relación de aspecto", value: profile },
       { label: "Diámetro del rin", value: `${rim} pulgadas` },
       { label: "Índice de carga", value: loadIndex },
@@ -34,7 +41,7 @@ function toTireDetail(tire: Tire): ProductDetailProduct {
       { label: "Construcción", value: "Radial" },
       { label: "Cantidad de llantas", value: "1" },
       { label: "Tipo de servicio", value: "Consultar aplicación" },
-      { label: "Tipo de terreno", value: tire.model.toUpperCase().includes("AT") ? "Todo terreno (A/T)" : "Carretera" },
+      { label: "Tipo de terreno", value: terrain },
       { label: "Disponibilidad", value: stockCount ? `${stockCount} unidades` : "Sobre pedido" },
     ],
     cartItem: {
