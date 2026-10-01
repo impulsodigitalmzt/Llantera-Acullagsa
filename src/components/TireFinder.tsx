@@ -270,6 +270,10 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
           </div>
           {shown.length ? (
             <div className="relative">
+              {shown.length > 2 && <div className="mb-2 flex justify-end gap-2 sm:hidden">
+                <button type="button" aria-label="Productos anteriores" disabled={activeSlide === 0} onClick={() => scrollCarousel(-1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronLeft className="size-4" /></button>
+                <button type="button" aria-label="Productos siguientes" disabled={activeSlide >= shown.length - 2} onClick={() => scrollCarousel(1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronRight className="size-4" /></button>
+              </div>}
               <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }} onScroll={handleCarouselScroll}>
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
@@ -284,9 +288,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                 })}
               </div>
               {shown.length > 2 && <div className="mt-3 flex items-center gap-3 sm:hidden">
-                <button type="button" aria-label="Productos anteriores" disabled={activeSlide === 0} onClick={() => scrollCarousel(-1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronLeft className="size-4" /></button>
-                <input type="range" min="0" max="100" step="1" value={carouselProgress} aria-label="Desplazar productos" onChange={(event) => { const el = carouselRef.current; if (el) el.scrollLeft = (Number(event.target.value) / 100) * (el.scrollWidth - el.clientWidth); }} className="h-2 min-w-0 flex-1 cursor-pointer accent-primary" />
-                <button type="button" aria-label="Productos siguientes" disabled={activeSlide >= shown.length - 2} onClick={() => scrollCarousel(1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronRight className="size-4" /></button>
+                <input type="range" min="0" max="100" step="1" value={carouselProgress} aria-label="Desplazar productos" onChange={(event) => { const el = carouselRef.current; if (el) el.scrollLeft = (Number(event.target.value) / 100) * (el.scrollWidth - el.clientWidth); }} className="carousel-scrollbar min-w-0 flex-1" style={{ "--carousel-thumb-width": `${Math.max(20, (2 / shown.length) * 100)}%` } as React.CSSProperties} />
               </div>}
             </div>
           ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay llantas con esos filtros. Escríbenos por WhatsApp y la conseguimos.</p>}
