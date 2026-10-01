@@ -279,11 +279,21 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
   onOpenProduct: (product: ProductDetailProduct, products: ProductDetailProduct[]) => void;
 }) {
   const [tab, setTab] = useState<CatalogTab>("llantas");
+  const scrollToPanel = (id: CatalogTab) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.getElementById(`panel-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  };
 
   useEffect(() => {
     const applyHash = () => {
       const next = hashToTab(window.location.hash);
-      if (next) setTab(next);
+      if (next) {
+        setTab(next);
+        scrollToPanel(next);
+      }
     };
     applyHash();
     window.addEventListener("hashchange", applyHash);
@@ -292,6 +302,7 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
 
   const selectTab = (id: CatalogTab) => {
     setTab(id);
+    scrollToPanel(id);
     const hash = `#${id}`;
     if (window.location.hash !== hash) {
       history.replaceState(null, "", hash);
@@ -305,9 +316,6 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
       aria-label="Catálogo de productos"
     >
       <span id="inicio" className="sr-only">Inicio</span>
-      <span id="llantas" className="sr-only">Llantas</span>
-      <span id="acumuladores" className="sr-only">Acumuladores LTH</span>
-      <span id="amortiguadores" className="sr-only">Amortiguadores</span>
 
       <div
         role="tablist"
@@ -339,8 +347,10 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
       </div>
 
       {tab === "llantas" && (
-        <div role="tabpanel" id="panel-llantas" aria-labelledby="tab-llantas">
-          <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+        <div id="llantas" className="scroll-mt-36">
+          <div role="tabpanel" id="panel-llantas" aria-labelledby="tab-llantas" className="scroll-mt-36">
+            <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+          </div>
         </div>
       )}
 
@@ -349,9 +359,9 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
           role="tabpanel"
           id="panel-acumuladores"
           aria-labelledby="tab-acumuladores"
-          className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7"
+          className="scroll-mt-36 rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7"
         >
-          <div className="border-b border-border pb-6">
+          <div id="acumuladores" className="scroll-mt-36 border-b border-border pb-6">
             <p className="text-xs font-bold uppercase text-primary">Potencia certificada</p>
             <h2 className="mt-2 text-3xl font-black sm:text-4xl">Acumuladores LTH®</h2>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Una solución para cada vehículo, respaldada por asesoría especializada.</p>
@@ -367,9 +377,9 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
           role="tabpanel"
           id="panel-amortiguadores"
           aria-labelledby="tab-amortiguadores"
-          className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7"
+          className="scroll-mt-36 rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7"
         >
-          <div className="border-b border-border pb-6">
+          <div id="amortiguadores" className="scroll-mt-36 border-b border-border pb-6">
             <p className="text-xs font-bold uppercase text-primary">Suspensión</p>
             <h2 className="mt-2 text-3xl font-black sm:text-4xl">Amortiguadores</h2>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.</p>
