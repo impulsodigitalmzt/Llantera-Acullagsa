@@ -36,7 +36,7 @@ const CONFIG: Record<Category, {
   },
 };
 
-export function ProductFinder({ category, onAddToCart }: {
+export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
   category: Category;
   onAddToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   onOpenProduct: (product: ProductDetailProduct, products: ProductDetailProduct[]) => void;
