@@ -112,6 +112,11 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
           </aside>
         </div>
 
+        <section className="mt-8 border-t border-border pt-7" aria-labelledby="descripcion-producto">
+          <h2 id="descripcion-producto" className="text-xl font-black">Descripción</h2>
+          <p className="mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.description}</p>
+        </section>
+
         {relatedProducts.length > 0 && <section className="mt-10 border-t border-border pt-7">
           <div className="flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-2 text-lg font-black"><PackageSearch className="size-5 text-primary" /> También puede interesarte</h3>
@@ -131,17 +136,11 @@ export function ProductDetailPage({ product, products, onBack, onSelectProduct, 
             ))}
           </div>
         </section>}
-        <section id="caracteristicas-producto" className="mt-8 grid gap-8 border-t border-border pt-7 lg:grid-cols-2">
-          <div>
-            <h2 className="text-xl font-black">Características del producto</h2>
-            <dl className="mt-4 divide-y divide-border border-y border-border">
-              {product.specifications.map(({ label, value }) => <div key={label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4 py-3 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold">{value}</dd></div>)}
-            </dl>
-          </div>
-          <div>
-            <h2 className="text-xl font-black">Descripción</h2>
-            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">{product.description}</p>
-          </div>
+        <section id="caracteristicas-producto" className="mt-8 max-w-4xl border-t border-border pt-7">
+          <h2 className="text-xl font-black">Características del producto</h2>
+          <dl className="mt-4 divide-y divide-border border-y border-border">
+            {product.specifications.map(({ label, value }) => <div key={label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4 py-3 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold">{value}</dd></div>)}
+          </dl>
         </section>
       </div>
     </div>

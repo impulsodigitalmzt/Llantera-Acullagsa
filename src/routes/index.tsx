@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({
 
 const nav = [
   ["Inicio", "#inicio"], ["Llantas", "#llantas"], ["Acumuladores", "#acumuladores"],
-  ["Amortiguadores", "#amortiguadores"], ["Servicios", "#servicios"], ["Contacto", "#contacto"],
+  ["Amortiguadores", "#amortiguadores"], ["Servicios", "#servicios"], ["Sucursales", "#sucursales"],
 ];
 
 type CatalogTab = "llantas" | "acumuladores" | "amortiguadores";
@@ -75,6 +75,90 @@ const benefits: Array<[LucideIcon, string, string]> = [
   [Clock3, "Servicio eficiente", "Procesos enfocados en reducir tus tiempos de espera."],
   [Headphones, "Personal calificado", "Asesoría clara para elegir la mejor opción para tu vehículo."],
 ];
+
+const branches = [
+  {
+    name: "Matriz",
+    address: "Av. Gabriel Leyva 1390, Col. Montuosa, Mazatlán, Sinaloa, C.P. 82000",
+    phone: "669 985 54 24",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2020/01/gabriel-leyva.jpg",
+  },
+  {
+    name: "Suc. Insurgentes",
+    address: "Av. Insurgentes 1428, Col. Sembradores de la Amistad, Mazatlán, Sinaloa, C.P. 82146",
+    phone: "669 986 77 27",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2020/01/suc-insurgentes.jpg",
+  },
+  {
+    name: "Suc. Col. Juárez",
+    address: "13 de Abril 805, Col. Benito Juárez, Mazatlán, Sinaloa, C.P. 82180",
+    phone: "669 986 53 76",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2020/01/su-juarez.jpg",
+  },
+  {
+    name: "Suc. Villa Unión",
+    address: "Blvd. Niños Héroes 203, Villa Unión, Centro, Mazatlán, Sinaloa, C.P. 82210",
+    phone: "669 193 7570",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2020/01/suc-villa-union.jpg",
+  },
+  {
+    name: "CEDIS Valle del Ejido",
+    address: "Av. Francisco González Bocanegra 9003, Col. Valle del Ejido, Mazatlán, Sinaloa",
+    phone: "669 200 9801",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2020/01/cedis-venadillo.jpg",
+  },
+  {
+    name: "Suc. Marina Mazatlán",
+    address: "Plaza California, Local 1, Av. Carlos Canseco, Marina Mazatlán",
+    phone: "6696 88 42 23",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2022/06/Suc.-Marina-Mazatlan-1024x575.jpeg",
+  },
+  {
+    name: "Suc. Real Pacífico",
+    address: "Av. Óscar Pérez Escobosa 6006, Local 10, Fracc. Real Pacífico",
+    phone: "669 270 8745",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2024/12/Imagen-de-WhatsApp-2024-12-20-a-las-10.13.30_8077c0f0-1024x768.jpg",
+  },
+  {
+    name: "Suc. Rafael Buelna",
+    address: "Av. Rafael Buelna 210, Local 1, Col. Hacienda Las Cruces",
+    phone: "669 991 3865",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-02-at-11.24.10-AM-1024x768.jpeg",
+  },
+  {
+    name: "Suc. Ejército Mexicano",
+    address: "Av. Ejército Mexicano 2275-B, Col. Brisas del Mar",
+    phone: "669 227 7426",
+    image: "https://acullagsa.com.mx/wp-content/uploads/2026/07/ejercito-225x300.jpeg",
+  },
+];
+
+function Branches() {
+  return (
+    <section id="sucursales" className="scroll-mt-20 pb-16">
+      <div className="bg-primary px-4 py-8 text-center text-primary-foreground sm:py-10">
+        <h2 className="text-3xl font-black sm:text-4xl">Sucursales</h2>
+        <p className="mt-2 text-sm text-primary-foreground/85">Encuentra tu sucursal Acullagsa en Mazatlán y Villa Unión.</p>
+      </div>
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-x-5 gap-y-8 px-4 pt-8 sm:grid-cols-2 lg:grid-cols-3">
+        {branches.map((branch) => {
+          const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.address)}`;
+          return (
+            <article key={branch.name} className="min-w-0">
+              <a href={mapUrl} target="_blank" rel="noreferrer" aria-label={`Ver ${branch.name} en Google Maps`} className="block overflow-hidden bg-muted">
+                <img src={branch.image} alt={`Fachada de ${branch.name} de Acullagsa`} loading="lazy" className="aspect-[16/9] w-full object-cover transition-transform duration-300 hover:scale-[1.03]" />
+              </a>
+              <h3 className="mt-3 text-sm font-black">{branch.name}</h3>
+              <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><MapPin className="mt-0.5 size-3.5 shrink-0 text-primary" />{branch.address}</p>
+              <a href={`tel:${branch.phone.replace(/\D/g, "")}`} className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-primary hover:underline"><Phone className="size-3.5" />{branch.phone}</a>
+              <a href={mapUrl} target="_blank" rel="noreferrer" className="ml-4 text-xs font-semibold text-primary hover:underline">Cómo llegar</a>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 const lthLines = [
   { name: "El alma de tu automóvil", image: "lth-auto.png" },
@@ -345,6 +429,8 @@ function Index() {
             <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-14" />
           </section>
           <CatalogHub onAddToCart={addToCart} onOpenProduct={openProduct} />
+
+          <Branches />
 
           <section id="servicios" className="bg-brand-ink py-20 text-primary-foreground"><div className="mx-auto max-w-6xl px-4"><div className="max-w-3xl"><p className="text-xs font-bold uppercase text-primary">Centro de servicio LTH</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">No solo vendemos.<br/>Te ponemos en marcha.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-primary-foreground/70">Contamos con equipo y personal capacitado para diagnosticar, instalar y cuidar tu vehículo con procesos confiables.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{serviceItems.map(([Icon, label]) => <div key={label} className="flex items-center gap-3 border-b border-primary-foreground/15 pb-4 text-sm font-bold"><Icon className="size-5 text-primary" />{label}</div>)}</div><Button asChild size="xl" variant="hero" className="mt-8"><a href="tel:6699855424"><Phone /> Cotizar servicio</a></Button></div></div></section>
 
