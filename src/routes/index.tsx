@@ -252,10 +252,22 @@ function Header({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
           <Button variant="ghost" size="icon" aria-label={open ? "Cerrar menú" : "Abrir menú"} className="lg:hidden" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</Button>
         </div>
       </div>
-      {open && <nav className="border-t border-border bg-background px-4 py-3 lg:hidden" aria-label="Navegación móvil">{nav.map(([label, href]) => {
-        const Icon = (href && navIcons[href]) || House;
-        return <a key={href} href={href} onClick={() => setOpen(false)} className="flex items-center gap-3 border-b border-border py-3 text-sm font-bold uppercase last:border-0"><Icon className="size-4 shrink-0 text-primary" aria-hidden="true" />{label}</a>;
-      })}</nav>}
+      {open && <nav className="absolute right-3 top-full z-50 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden border border-border border-t-2 border-t-primary bg-background shadow-2xl ring-1 ring-black/5 lg:hidden" aria-label="Navegación móvil">
+        <div className="flex items-center justify-between bg-brand-ink px-4 py-3 text-primary-foreground">
+          <span className="text-xs font-black uppercase">Explorar</span>
+          <span className="text-[10px] font-semibold uppercase text-primary-foreground/60">Acullagsa</span>
+        </div>
+        <div className="p-2">
+          {nav.map(([label, href]) => {
+            const Icon = (href && navIcons[href]) || House;
+            return <a key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-12 items-center gap-3 px-2 text-sm font-bold uppercase transition-colors hover:bg-brand-soft hover:text-primary focus-visible:bg-brand-soft focus-visible:text-primary focus-visible:outline-none">
+              <span className="flex size-8 shrink-0 items-center justify-center border border-brand-line bg-brand-soft text-primary"><Icon className="size-4" aria-hidden="true" /></span>
+              <span className="flex-1">{label}</span>
+              <span className="mr-1 size-1.5 rounded-full bg-primary/40" aria-hidden="true" />
+            </a>;
+          })}
+        </div>
+      </nav>}
     </header>
   </>;
 }
