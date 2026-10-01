@@ -197,17 +197,19 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
               {shown.map((t) => {
                 const off = Math.round((1 - t.price / t.list) * 100);
                 const detail = toTireDetail(t);
-                return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <div className="relative"><span className="absolute left-0 top-0 rounded-sm bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{off}%</span>
                     <p className="text-xs font-black italic text-primary">{t.brand}</p>
-                    <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="mx-auto mt-2 aspect-square w-44 object-contain" /></div>
+                    <div className="relative mx-auto mt-2 w-44">
+                      <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" />
+                      <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); onOpenProduct(detail, detailProducts); }}><Eye /> Vista rápida</Button>
+                    </div></div>
                   <h3 className="mt-3 font-black uppercase">{t.brand} {t.model}</h3>
                   <p className="text-sm font-bold">{t.size} {t.load}</p>
                   <p className="mt-2 text-sm text-muted-foreground line-through">{money(t.list)}</p>
                   <p className="text-xl font-black text-primary">{money(t.price)}</p>
                   <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
                   <p className={`mt-1 text-xs font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
-                  <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); onOpenProduct(detail, detailProducts); }}><Eye /> Ver detalles</Button>
                   <Button variant="dark" className="mt-4" onClick={(event) => { event.stopPropagation(); onAddToCart({
                     id: `tire-${t.brand}-${t.model}-${t.size}`,
                     name: `${t.brand} ${t.model}`,

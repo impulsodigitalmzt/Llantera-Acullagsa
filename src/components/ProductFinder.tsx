@@ -193,8 +193,8 @@ export function ProductFinder({ category, onAddToCart }: {
             {shownProducts.map((product) => {
               const discount = Math.round((1 - product.price / product.list) * 100);
               const detailProduct: ProductDetailProduct = product;
-              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}</div>
+              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col border border-border bg-background p-4 text-center transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <div className="relative flex aspect-square items-center justify-center"><span className="absolute left-0 top-0 z-10 bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); onOpenProduct(detailProduct, products); }}><Eye /> Vista rápida</Button></div>
                 <p className="mt-2 text-xs font-black italic text-primary">{product.brand}</p>
                 <h5 className="mt-1 font-black uppercase">{product.name}</h5>
                 <p className="text-sm font-bold">{product.detail}</p>
@@ -202,8 +202,7 @@ export function ProductFinder({ category, onAddToCart }: {
                 <p className="text-xl font-black text-primary">{money(product.price)}</p>
                 <p className="text-[11px] text-muted-foreground">Precio con IVA incluido</p>
                 <p className={`mt-1 text-xs font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
-                <Button variant="outline" className="mt-4" onClick={(event) => { event.stopPropagation(); onOpenProduct(detailProduct, products); }}><Eye /> Ver detalles</Button>
-                <Button variant="dark" className="mt-2" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
+                <Button variant="dark" className="mt-4" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart /> {product.stock ? "Añadir al carrito" : "Cotizar"}</Button>
               </article>;
             })}
           </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
