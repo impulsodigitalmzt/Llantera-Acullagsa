@@ -148,6 +148,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
   const formGrid = "mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
   const [activeSlide, setActiveSlide] = useState(0);
+  const [carouselProgress, setCarouselProgress] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
@@ -157,8 +158,6 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
     const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
     const scrollAmount = direction * (cardWidth + 12);
     el.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    const nextIndex = Math.max(0, Math.min(shown.length - 1, activeSlide + direction));
-    setActiveSlide(nextIndex);
   };
 
   const handleCarouselScroll = () => {
@@ -166,7 +165,9 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
     if (!el || !shown.length) return;
     const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
     const index = Math.round(el.scrollLeft / (cardWidth + 12));
-    setActiveSlide(Math.max(0, Math.min(shown.length - 1, index)));
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    setActiveSlide(Math.max(0, Math.min(shown.length - 2, index)));
+    setCarouselProgress(maxScroll > 0 ? (el.scrollLeft / maxScroll) * 100 : 0);
   };
 
   const card = (
@@ -269,12 +270,6 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
           </div>
           {shown.length ? (
             <div className="relative">
-              <div className="absolute -left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
-                <button type="button" aria-label="Anterior" onClick={() => scrollCarousel(-1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronLeft className="size-4" /></button>
-              </div>
-              <div className="absolute -right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
-                <button type="button" aria-label="Siguiente" onClick={() => scrollCarousel(1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronRight className="size-4" /></button>
-              </div>
               <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }} onScroll={handleCarouselScroll}>
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
@@ -288,7 +283,11 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                   </article>;
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-center gap-2 md:hidden">{shown.map((_, index) => <button key={index} type="button" aria-label={`Ir a tarjeta ${index + 1}`} onClick={() => { const el = carouselRef.current; if (!el) return; const card = el.querySelectorAll("article")[index]; card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" }); setActiveSlide(index); }} className={`h-2 rounded-full transition-all ${index === activeSlide ? "w-7 bg-primary" : "w-2 bg-border"}`} />)}</div>
+              {shown.length > 2 && <div className="mt-3 flex items-center gap-3 sm:hidden">
+                <button type="button" aria-label="Productos anteriores" disabled={activeSlide === 0} onClick={() => scrollCarousel(-1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronLeft className="size-4" /></button>
+                <input type="range" min="0" max="100" step="1" value={carouselProgress} aria-label="Desplazar productos" onChange={(event) => { const el = carouselRef.current; if (el) el.scrollLeft = (Number(event.target.value) / 100) * (el.scrollWidth - el.clientWidth); }} className="h-2 min-w-0 flex-1 cursor-pointer accent-primary" />
+                <button type="button" aria-label="Productos siguientes" disabled={activeSlide >= shown.length - 2} onClick={() => scrollCarousel(1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronRight className="size-4" /></button>
+              </div>}
             </div>
           ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay llantas con esos filtros. Escríbenos por WhatsApp y la conseguimos.</p>}
         </div>
