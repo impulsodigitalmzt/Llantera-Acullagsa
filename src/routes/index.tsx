@@ -459,7 +459,7 @@ function Index() {
         </>}
         {productSelection && <ProductDetailPage product={productSelection.product} products={productSelection.products} onBack={closeProduct} onSelectProduct={(product) => setProductSelection((selection) => selection ? { ...selection, product } : selection)} onAddToCart={addToCart} />}
       </main>
-      {!productSelection && !showBranches && <footer className="bg-brand-ink py-12 text-primary-foreground">
+      <footer className="bg-brand-ink py-12 text-primary-foreground">
         <div className="mx-auto grid max-w-6xl gap-9 px-4 md:grid-cols-[1.2fr_1fr_1fr]">
           <div>
             <BrandLogo inverted />
@@ -483,7 +483,7 @@ function Index() {
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-6xl border-t border-primary-foreground/10 px-4 pt-6 text-[11px] text-primary-foreground/40">© 2026 Acullagsa. Todos los derechos reservados.</div>
-      </footer>}
+      </footer>
       {!showBranches && <a href="https://wa.me/526699402253" target="_blank" rel="noreferrer" aria-label="Contactar por WhatsApp" className="fixed bottom-5 right-5 z-50 flex size-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform hover:scale-105"><MessageCircle className="size-6" /></a>}
       <ShoppingCart
         items={cartItems}
