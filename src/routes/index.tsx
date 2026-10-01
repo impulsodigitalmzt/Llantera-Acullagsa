@@ -188,7 +188,7 @@ const tireBrands = [
 
 function Brands() {
   return (
-    <section id="marcas" className="bg-brand-soft py-20">
+    <section id="marcas" className="bg-brand-soft py-12 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center">
           <p className="text-xs font-bold uppercase text-primary">Venta + instalación</p>
@@ -196,17 +196,17 @@ function Brands() {
           <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Acumuladores & Llantas</p>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">Opciones para autos, camionetas, camiones y vehículos agrícolas. Te asesoramos para encontrar la medida adecuada.</p>
         </div>
-        <div className="mt-10 grid gap-px overflow-hidden rounded-md bg-border sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-md bg-border sm:mt-10 lg:grid-cols-4">
           {lthLines.map((item) => (
-            <div key={item.name} className="flex min-h-32 items-center justify-center bg-background p-6">
-              <img src={`/marcas/${item.image}`} alt={`LTH ${item.name}`} loading="lazy" className="h-16 w-full object-contain" />
+            <div key={item.name} className="flex min-h-24 items-center justify-center bg-background p-3 sm:min-h-32 sm:p-6">
+              <img src={`/marcas/${item.image}`} alt={`LTH ${item.name}`} loading="lazy" className="h-12 w-full object-contain sm:h-16" />
             </div>
           ))}
         </div>
-        <div className="mt-px grid gap-px overflow-hidden rounded-md bg-border sm:grid-cols-2 lg:grid-cols-6">
+        <div className="mt-px grid grid-cols-3 gap-px overflow-hidden rounded-md bg-border lg:grid-cols-6">
           {tireBrands.map((b) => (
-            <div key={b.name} className="flex min-h-32 items-center justify-center bg-background p-4">
-              <img src={`/marcas/${b.image}`} alt={b.name} loading="lazy" className="h-16 w-full object-contain" />
+            <div key={b.name} className="flex min-h-24 items-center justify-center bg-background p-3 sm:min-h-32 sm:p-4">
+              <img src={`/marcas/${b.image}`} alt={b.name} loading="lazy" className="h-12 w-full object-contain sm:h-16" />
             </div>
           ))}
         </div>
@@ -474,7 +474,7 @@ function Index() {
 
           <Brands />
 
-          <section id="nosotros" className="mx-auto max-w-6xl px-4 py-20"><div className="text-center"><p className="text-xs font-bold uppercase text-primary">¿Por qué Acullagsa?</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Confianza que sí responde.</h2></div><div className="mt-12 grid gap-8 md:grid-cols-3">{benefits.map(([Icon,title,text]) => <div key={title} className="border-t-2 border-primary pt-6"><Icon className="size-9 text-primary" /><h3 className="mt-5 text-lg font-black">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{text}</p></div>)}</div></section>
+          <section id="nosotros" className="mx-auto max-w-6xl px-4 py-12 sm:py-20"><div className="text-center"><p className="text-xs font-bold uppercase text-primary">¿Por qué Acullagsa?</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">Confianza que sí responde.</h2></div><div className="mt-8 grid grid-cols-3 gap-3 sm:mt-12 sm:gap-8">{benefits.map(([Icon,title,text]) => <div key={title} className="min-w-0 border-t-2 border-primary pt-4 sm:pt-6"><Icon className="size-7 text-primary sm:size-9" /><h3 className="mt-3 text-sm font-black leading-tight sm:mt-5 sm:text-lg">{title}</h3><p className="mt-2 text-xs leading-5 text-muted-foreground sm:mt-3 sm:text-sm sm:leading-6">{text}</p></div>)}</div></section>
 
           <section id="contacto" className="bg-primary py-14 text-primary-foreground"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 md:flex-row md:items-center"><div><p className="text-xs font-bold uppercase">Atención rápida en Mazatlán</p><h2 className="mt-2 text-3xl font-black">¿Tu vehículo no enciende?</h2><p className="mt-2 text-sm text-primary-foreground/80">Escríbenos y te ayudamos a encontrar la batería correcta.</p></div><div className="flex flex-wrap gap-3"><Button asChild size="xl" variant="dark"><a href="https://wa.me/526699402253" target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button><Button asChild size="xl" variant="heroOutline"><a href="tel:6699404388"><Phone /> 669 940 4388</a></Button></div></div></section>
         </>}
