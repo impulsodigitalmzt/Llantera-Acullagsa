@@ -125,41 +125,39 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart }: 
 
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
-  const formGrid = "mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
+  const formGrid = "mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
 
   const card = (
       <div className={`overflow-hidden bg-background shadow-2xl ring-1 ring-border ${embedded ? "rounded-b-md rounded-t-none" : "rounded-md"}`}>
-        <div className="p-5 md:p-7">
-          {variant === "hero"
-            ? <h1 className="text-xl font-black sm:text-2xl">Busca por medida o por vehículo</h1>
-            : <h2 className="text-xl font-black sm:text-2xl">Encuentra la llanta exacta para tu vehículo</h2>}
-          <p className="mt-1 text-sm text-muted-foreground">{variant === "hero" ? "Captura la medida que trae tu llanta o dinos qué auto tienes y te mostramos las compatibles." : "Busca por la medida que trae tu llanta, o dinos qué auto tienes y te decimos cuál le va."}</p>
-          <div className="mt-4 flex border-b border-border">
-            <button className={tab(mode === "size")} onClick={() => setMode("size")}><Ruler className="size-4" /> Por medida</button>
-            <button className={tab(mode === "vehicle")} onClick={() => setMode("vehicle")}><CarFront className="size-4" /> Por vehículo</button>
+        <div className="grid items-stretch md:grid-cols-[minmax(0,1fr)_240px]">
+          <div className="min-w-0 p-4 sm:p-5">
+            {variant === "hero"
+              ? <h1 className="text-xl font-black sm:text-2xl">Busca por medida o por vehículo</h1>
+              : <h2 className="text-xl font-black sm:text-2xl">Encuentra la llanta exacta para tu vehículo</h2>}
+            <p className="mt-1 text-sm text-muted-foreground">{variant === "hero" ? "Captura la medida que trae tu llanta o dinos qué auto tienes y te mostramos las compatibles." : "Busca por la medida que trae tu llanta, o dinos qué auto tienes y te decimos cuál le va."}</p>
+            <div className="mt-4 flex border-b border-border">
+              <button type="button" className={tab(mode === "size")} onClick={() => setMode("size")}><Ruler className="size-4" /> Por medida</button>
+              <button type="button" className={tab(mode === "vehicle")} onClick={() => setMode("vehicle")}><CarFront className="size-4" /> Por vehículo</button>
+            </div>
+            {mode === "size" ? (
+              <div className={formGrid}>
+                <label className={field}>Ancho<select className={sel} value={w} onChange={(e) => { setW(e.target.value); setP(""); setR(""); }}><option value="">Ancho</option>{widths.map((x) => <option key={x}>{x}</option>)}</select></label>
+                <label className={field}>Perfil<select className={sel} disabled={!w} value={p} onChange={(e) => { setP(e.target.value); setR(""); }}><option value="">Perfil</option>{profiles.map((x) => <option key={x}>{x}</option>)}</select></label>
+                <label className={field}>Rin<select className={sel} disabled={!p} value={r} onChange={(e) => setR(e.target.value)}><option value="">Rin</option>{rins.map((x) => <option key={x} value={x}>R{x}</option>)}</select></label>
+                <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap px-3" onClick={search}><Search /> Ver llantas</Button>
+              </div>
+            ) : (
+              <div className={formGrid}>
+                <label className={field}>Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
+                <label className={field}>Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
+                <label className={field}>Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
+                <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap px-3" onClick={search}><Search /> Ver llantas</Button>
+              </div>
+            )}
           </div>
-          {mode === "size" ? (
-            <div className={formGrid}>
-              <label className={field}>Ancho<select className={sel} value={w} onChange={(e) => { setW(e.target.value); setP(""); setR(""); }}><option value="">Ancho</option>{widths.map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className={field}>Perfil<select className={sel} disabled={!w} value={p} onChange={(e) => { setP(e.target.value); setR(""); }}><option value="">Perfil</option>{profiles.map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className={field}>Rin<select className={sel} disabled={!p} value={r} onChange={(e) => setR(e.target.value)}><option value="">Rin</option>{rins.map((x) => <option key={x} value={x}>R{x}</option>)}</select></label>
-              <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> Ver llantas</Button>
-            </div>
-          ) : (
-            <div className={formGrid}>
-              <label className={field}>Marca<select className={sel} value={make} onChange={(e) => { setMake(e.target.value); setModel(""); }}><option value="">Marca</option>{Object.keys(VEHICLES).map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className={field}>Modelo<select className={sel} disabled={!make} value={model} onChange={(e) => setModel(e.target.value)}><option value="">Modelo</option>{make && Object.keys(VEHICLES[make] ?? {}).map((x) => <option key={x}>{x}</option>)}</select></label>
-              <label className={field}>Año<select className={sel} disabled={!model} value={year} onChange={(e) => setYear(e.target.value)}><option value="">Año</option>{YEARS.map((x) => <option key={x}>{x}</option>)}</select></label>
-              <Button size="xl" variant="hero" disabled={!canSearch} className="h-12 w-full self-end justify-center whitespace-nowrap" onClick={search}><Search /> Ver llantas {canSearch ? preview : ""}</Button>
-            </div>
-          )}
-          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md bg-brand-soft px-4 py-3">
-            <p className="text-2xl font-black text-primary">{preview ? preview.replace("R", " R") : "—/— R—"}</p>
-            <div>
-              <p className="text-sm font-bold">{mode === "vehicle" && vehicleSize ? `Medida de fábrica: ${make} ${model}` : "Elige ancho, perfil y rin."}</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">La medida viene en el costado de tu llanta, por ejemplo 205/55R16.</p>
-            </div>
+          <div className="flex items-center justify-center border-t border-border bg-white p-2 md:border-l md:border-t-0">
+            <img src="/llantas/medida_llantas.png" alt="Guía visual para identificar ancho, perfil y rin en el costado de una llanta" className="h-auto max-h-36 w-full object-contain md:max-h-40" />
           </div>
         </div>
       </div>
