@@ -252,25 +252,26 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
-                  const stockBadge = t.stock ? `${Math.max(3, Math.min(20, 3 + (t.price % 17)))} PIEZA(S)` : "SOBRE PEDIDO";
-                  const stockTone = t.stock ? "bg-[#dff6db] text-[#0b7a2d]" : "bg-[#fff1c8] text-[#9a6a00]";
+                  const stockCount = t.stock ? Math.max(1, Math.min(20, 3 + (t.price % 17))) : 0;
+                  const stockBadge = t.stock ? `${stockCount} PIEZA${stockCount === 1 ? "" : "S"}` : "SOBRE PEDIDO";
+                  const stockTone = !t.stock ? "bg-[#fff1c8] text-[#9a6a00]" : stockCount <= 3 ? "bg-[#ffe39a] text-[#7a5200]" : "bg-[#18b74d] text-white";
                   const detail = toTireDetail(t);
                   return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-white text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
                     <div className="flex min-h-[46px] items-center justify-center border-b border-border bg-white px-3 py-2">
                       {BRAND_LOGOS[t.brand] ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-7 max-w-[72%] object-contain" /> : <span className="text-[1rem] font-black uppercase tracking-[-0.08em] text-[#0f172a]">{t.brand}</span>}
                     </div>
                     <div className="relative bg-[#f6f5f4] px-2 pb-2 pt-4">
-                      <span className={`absolute left-2 top-2 inline-flex items-center rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] ${stockTone}`}>{stockBadge}</span>
                       <span className="absolute right-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
                       <div className="relative mx-auto w-32 sm:w-full"><img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" /><Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button></div>
                     </div>
-                    <div className="flex flex-1 flex-col bg-white px-3 pb-2 pt-1 text-left">
-                      <h3 className="text-[12px] font-black uppercase leading-[1.1] tracking-[-0.05em] text-[#111827]">{t.model}</h3>
-                      <div className="mt-1 flex items-baseline gap-2">
+                    <div className="flex flex-1 flex-col bg-white px-3 pb-2 pt-1 text-center">
+                      <span className={`mx-auto inline-flex items-center justify-center rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] ${stockTone}`}>{stockBadge}</span>
+                      <h3 className="mt-2 text-[12px] font-black uppercase leading-[1.1] tracking-[-0.05em] text-[#111827]">{t.model}</h3>
+                      <div className="mt-1 flex items-baseline justify-center gap-2">
                         <span className="text-[12px] font-black tracking-[-0.04em] text-[#d11f27]">{t.size}</span>
                         <span className="text-[9px] font-bold uppercase text-muted-foreground">{t.load}</span>
                       </div>
-                      <div className="mt-2 text-left">
+                      <div className="mt-2 text-center">
                         <p className="text-[14px] font-black tracking-tight text-[#0b7fdd]">{money(t.price)}</p>
                         <p className="text-[10px] text-muted-foreground line-through">{money(t.list)}</p>
                       </div>
