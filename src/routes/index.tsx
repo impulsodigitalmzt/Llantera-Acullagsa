@@ -364,38 +364,23 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
 
         {catalogTabs.map(({ id }) => {
           const isActive = tab === id;
-
-          if (id === "llantas") {
-            return (
-              <div
-                key={id}
-                role="tabpanel"
-                id={`panel-${id}`}
-                aria-labelledby={`tab-${id}`}
-                className={isActive ? "block" : "hidden"}
-              >
-                <div className="relative min-h-[420px] rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
-                  <div id="llantas" className="scroll-mt-36">
-                    <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
-                  </div>
-                </div>
-              </div>
-            );
-          }
-
-          const title = id === "acumuladores"
+          const title = id === "llantas"
             ? {
-                eyebrow: "Potencia certificada",
-                heading: "Acumuladores LTH®",
-                text: "Una solución para cada vehículo, respaldada por asesoría especializada.",
-                mt: "mt-6",
+                eyebrow: "Busca por medida o por vehículo",
+                heading: "Busca por medida o por vehículo",
+                text: "Captura la medida que trae tu llanta o dinos qué auto tienes y te mostramos las compatibles.",
               }
-            : {
-                eyebrow: "Suspensión",
-                heading: "Amortiguadores",
-                text: "Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.",
-                mt: "mt-8",
-              };
+            : id === "acumuladores"
+              ? {
+                  eyebrow: "Potencia certificada",
+                  heading: "Acumuladores LTH®",
+                  text: "Una solución para cada vehículo, respaldada por asesoría especializada.",
+                }
+              : {
+                  eyebrow: "Suspensión",
+                  heading: "Amortiguadores",
+                  text: "Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.",
+                };
 
           return (
             <div
@@ -406,14 +391,21 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
               className={isActive ? "block" : "hidden"}
             >
               <div className="relative min-h-[420px] rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
-                <div id={id} className="scroll-mt-36 border-b border-border pb-6">
+                <div className="mb-6 border-b border-border pb-6">
                   <p className="text-xs font-bold uppercase text-primary">{title.eyebrow}</p>
-                  <h2 className="mt-2 text-3xl font-black sm:text-4xl">{title.heading}</h2>
+                  <h1 className="mt-2 text-3xl font-black sm:text-4xl">{title.heading}</h1>
                   <p className="mt-2 max-w-xl text-sm text-muted-foreground">{title.text}</p>
                 </div>
-                <div className={title.mt}>
-                  <ProductFinder category={id} onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
-                </div>
+
+                {id === "llantas" ? (
+                  <div id="llantas" className="scroll-mt-36">
+                    <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+                  </div>
+                ) : (
+                  <div className="mt-6">
+                    <ProductFinder category={id} onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+                  </div>
+                )}
               </div>
             </div>
           );
