@@ -275,7 +275,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                         <span className="text-[9px] font-bold uppercase text-muted-foreground">{t.load}</span>
                       </div>
                       <div className="mt-2 text-center">
-                        <p className="text-[16px] font-black tracking-tight text-[#0b7fdd]">{money(t.price)}</p>
+                        <p className="text-[18px] font-black tracking-tight text-[#0b7fdd]">{money(t.price)}</p>
                         <p className="text-[10px] text-muted-foreground line-through">{money(t.list)}</p>
                       </div>
                     </div>
