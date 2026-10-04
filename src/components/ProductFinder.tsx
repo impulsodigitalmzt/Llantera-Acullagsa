@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from "react";
-import { BatteryCharging, ChevronLeft, ChevronRight, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
+import { useMemo, useState } from "react";
+import { BatteryCharging, CircleDot, Eye, Search, ShoppingCart, SlidersHorizontal, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { ProductQuickView } from "@/components/ProductQuickView";
@@ -157,50 +157,7 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
   const sel = "h-12 w-full min-w-0 rounded-md border border-input bg-background px-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 sm:px-3 sm:text-sm";
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
   const formGrid = "mt-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto]";
-  const [isDragging, setIsDragging] = useState(false);
-  const [activeSlide, setActiveSlide] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
-  const carouselRef = useRef<HTMLDivElement | null>(null);
-
-  const scrollCarousel = (direction: 1 | -1) => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
-    const scrollAmount = direction * (cardWidth + 16);
-    el.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    const nextIndex = Math.max(0, Math.min(shownProducts.length - 1, activeSlide + direction));
-    setActiveSlide(nextIndex);
-  };
-
-  const handleCarouselScroll = () => {
-    const el = carouselRef.current;
-    if (!el || !shownProducts.length) return;
-    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
-    const center = el.scrollLeft + el.clientWidth / 2;
-    const index = Math.round(center / (cardWidth + 16));
-    setActiveSlide(Math.max(0, Math.min(shownProducts.length - 1, index)));
-  };
-
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const el = event.currentTarget;
-    dragState.current = { startX: event.clientX, scrollLeft: el.scrollLeft };
-    setIsDragging(true);
-    el.setPointerCapture?.(event.pointerId);
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragState.current) return;
-    const el = event.currentTarget;
-    const delta = event.clientX - dragState.current.startX;
-    el.scrollLeft = dragState.current.scrollLeft - delta;
-  };
-
-  const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    dragState.current = null;
-    setIsDragging(false);
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
-  };
 
   return <>
     <div className="overflow-hidden rounded-md bg-background shadow-xl ring-1 ring-border">
@@ -272,26 +229,19 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
               </div>
             )}
           </div>
-          {shownProducts.length ? <div className="relative">
-            <div className="absolute -left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
-              <button type="button" aria-label="Anterior" onClick={() => scrollCarousel(-1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronLeft className="size-4" /></button>
+          {shownProducts.length ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {shownProducts.map((product) => {
+                const discount = Math.round((1 - product.price / product.list) * 100);
+                const detailProduct: ProductDetailProduct = product;
+                return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                  <div className="relative flex aspect-square items-center justify-center rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
+                  <div className="mt-2 flex min-h-[105px] flex-col"><p className="text-[10px] font-black italic text-primary">{product.brand}</p><h5 className="mt-1 font-black uppercase leading-tight text-[11px]">{product.name}</h5><p className="mt-1 text-[10px] font-bold text-muted-foreground">{product.detail}</p><p className="mt-1 text-[10px] text-muted-foreground line-through">{money(product.list)}</p><p className="text-lg font-black tracking-tight text-primary">{money(product.price)}</p><p className="text-[9px] text-muted-foreground">IVA incluido</p><p className={`mt-1 text-[10px] font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p></div>
+                  <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart className="size-3.5" /> {product.stock ? "Añadir" : "Cotizar"}</Button>
+                </article>;
+              })}
             </div>
-            <div className="absolute -right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-background/90 p-2 shadow-sm backdrop-blur-sm md:flex">
-              <button type="button" aria-label="Siguiente" onClick={() => scrollCarousel(1)} className="flex size-8 items-center justify-center rounded-full text-foreground transition hover:bg-muted"><ChevronRight className="size-4" /></button>
-            </div>
-            <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch", touchAction: "pan-y", cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp} onPointerCancel={onPointerUp} onScroll={handleCarouselScroll}>
-            {shownProducts.map((product) => {
-              const discount = Math.round((1 - product.price / product.list) * 100);
-              const detailProduct: ProductDetailProduct = product;
-              return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex min-w-[62%] max-w-[62%] snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
-                <div className="relative flex aspect-square items-center justify-center rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
-                <div className="mt-2 flex min-h-[105px] flex-col"><p className="text-[10px] font-black italic text-primary">{product.brand}</p><h5 className="mt-1 font-black uppercase leading-tight text-[11px]">{product.name}</h5><p className="mt-1 text-[10px] font-bold text-muted-foreground">{product.detail}</p><p className="mt-1 text-[10px] text-muted-foreground line-through">{money(product.list)}</p><p className="text-lg font-black tracking-tight text-primary">{money(product.price)}</p><p className="text-[9px] text-muted-foreground">IVA incluido</p><p className={`mt-1 text-[10px] font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p></div>
-                <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart className="size-3.5" /> {product.stock ? "Añadir" : "Cotizar"}</Button>
-              </article>;
-            })}
-            </div>
-            <div className="mt-3 flex items-center justify-center gap-2 md:hidden">{shownProducts.map((_, index) => <button key={index} type="button" aria-label={`Ir al producto ${index + 1}`} onClick={() => { const el = carouselRef.current; if (!el) return; const card = el.querySelectorAll("article")[index]; card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" }); setActiveSlide(index); }} className={`h-2 rounded-full transition-all ${index === activeSlide ? "w-7 bg-primary" : "w-2 bg-border"}`} />)}</div>
-          </div> : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
+          ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay productos con esos filtros. Ajusta la búsqueda o solicita una cotización.</p>}
         </div>
       </section>
     )}

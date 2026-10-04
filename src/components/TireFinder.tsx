@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from "react";
-import { CarFront, ChevronLeft, ChevronRight, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CarFront, Eye, Ruler, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductDetailProduct } from "@/components/ProductDetailDialog";
 import { ProductQuickView } from "@/components/ProductQuickView";
@@ -147,28 +147,7 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
   const field = "flex min-w-0 flex-col gap-2 text-xs font-bold";
   const formGrid = "mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_160px]";
   const tab = (active: boolean) => `flex items-center gap-2 px-4 py-3 text-sm font-bold ${active ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`;
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [carouselProgress, setCarouselProgress] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const carouselRef = useRef<HTMLDivElement | null>(null);
-
-  const scrollCarousel = (direction: 1 | -1) => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
-    const scrollAmount = direction * (cardWidth + 12);
-    el.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  };
-
-  const handleCarouselScroll = () => {
-    const el = carouselRef.current;
-    if (!el || !shown.length) return;
-    const cardWidth = el.querySelector("article")?.getBoundingClientRect().width ?? 280;
-    const index = Math.round(el.scrollLeft / (cardWidth + 12));
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    setActiveSlide(Math.max(0, Math.min(shown.length - 2, index)));
-    setCarouselProgress(maxScroll > 0 ? (el.scrollLeft / maxScroll) * 100 : 0);
-  };
 
   const card = (
       <div className={`overflow-hidden bg-background shadow-2xl ring-1 ring-border ${embedded ? "rounded-b-md rounded-t-none" : "rounded-md"}`}>
@@ -270,15 +249,11 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
           </div>
           {shown.length ? (
             <div className="relative">
-              {shown.length > 2 && <div className="mb-2 flex justify-end gap-2 sm:hidden">
-                <button type="button" aria-label="Productos anteriores" disabled={activeSlide === 0} onClick={() => scrollCarousel(-1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronLeft className="size-4" /></button>
-                <button type="button" aria-label="Productos siguientes" disabled={activeSlide >= shown.length - 2} onClick={() => scrollCarousel(1)} className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-foreground transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"><ChevronRight className="size-4" /></button>
-              </div>}
-              <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-3 pl-1 pr-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }} onScroll={handleCarouselScroll}>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
                   const detail = toTireDetail(t);
-                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex basis-[calc(50%_-_6px)] shrink-0 snap-start cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
                     <div className="relative rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
                       <div className="flex h-4 items-center justify-center">{BRAND_LOGOS[t.brand] ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-4 max-w-20 object-contain" /> : <span className="text-[11px] font-black italic text-primary">{t.brand}</span>}</div>
                       <div className="relative mx-auto mt-2 w-32 sm:w-full"><img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" /><Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button></div></div>
@@ -287,9 +262,6 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                   </article>;
                 })}
               </div>
-              {shown.length > 2 && <div className="mt-3 flex items-center gap-3 sm:hidden">
-                <input type="range" min="0" max="100" step="1" value={carouselProgress} aria-label="Desplazar productos" onChange={(event) => { const el = carouselRef.current; if (el) el.scrollLeft = (Number(event.target.value) / 100) * (el.scrollWidth - el.clientWidth); }} className="carousel-scrollbar min-w-0 flex-1" style={{ "--carousel-thumb-width": `${Math.max(20, (2 / shown.length) * 100)}%` } as React.CSSProperties} />
-              </div>}
             </div>
           ) : <p className="rounded-md bg-brand-soft p-6 text-sm">No hay llantas con esos filtros. Escríbenos por WhatsApp y la conseguimos.</p>}
         </div>
