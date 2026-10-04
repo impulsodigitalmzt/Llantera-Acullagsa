@@ -254,7 +254,7 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
                       <span className="text-[10px] font-bold uppercase text-muted-foreground">{product.detail}</span>
                     </div>
                     <div className="mt-2 text-left">
-                      <p className="text-[14px] font-black tracking-tight text-[#0b7fdd]">{money(product.price)}</p>
+                      <p className="text-[16px] font-black tracking-tight text-[#0b7fdd]">{money(product.price)}</p>
                       <p className="text-[10px] text-muted-foreground line-through">{money(product.list)}</p>
                     </div>
                   </div>
