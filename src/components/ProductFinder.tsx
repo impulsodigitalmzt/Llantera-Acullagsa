@@ -234,10 +234,28 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
               {shownProducts.map((product) => {
                 const discount = Math.round((1 - product.price / product.list) * 100);
                 const detailProduct: ProductDetailProduct = product;
-                return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
-                  <div className="relative flex aspect-square items-center justify-center rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>{product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="size-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button></div>
-                  <div className="mt-2 flex min-h-[105px] flex-col"><p className="text-[10px] font-black italic text-primary">{product.brand}</p><h5 className="mt-1 font-black uppercase leading-tight text-[11px]">{product.name}</h5><p className="mt-1 text-[10px] font-bold text-muted-foreground">{product.detail}</p><p className="mt-1 text-[10px] text-muted-foreground line-through">{money(product.list)}</p><p className="text-lg font-black tracking-tight text-primary">{money(product.price)}</p><p className="text-[9px] text-muted-foreground">IVA incluido</p><p className={`mt-1 text-[10px] font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p></div>
-                  <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart className="size-3.5" /> {product.stock ? "Añadir" : "Cotizar"}</Button>
+                return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-white text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                  <div className="flex min-h-[50px] items-center justify-center border-b border-border bg-white px-3 py-2">
+                    <span className="text-[1rem] font-black uppercase tracking-[-0.08em] text-[#0f172a]">{product.brand}</span>
+                  </div>
+                  <div className="relative bg-[#f6f5f4] p-2">
+                    <span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>
+                    {product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="aspect-square w-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button>
+                  </div>
+                  <div className="flex flex-1 flex-col bg-white px-3 pb-3 pt-2 text-left">
+                    <div className="inline-flex w-fit items-center rounded-md bg-[#dff6db] px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#0b7a2d]">{product.stock ? "1 PIEZA(S)" : "SOBRE PEDIDO"}</div>
+                    <h5 className="mt-2 text-[12px] font-black uppercase leading-tight tracking-[-0.04em] text-[#111827]">{product.name}</h5>
+                    <p className="mt-1 text-[10px] font-bold text-muted-foreground">{product.detail}</p>
+                    <div className="mt-2">
+                      <p className="text-[10px] text-muted-foreground line-through">{money(product.list)}</p>
+                      <p className="text-[15px] font-black tracking-tight text-[#111827]">{money(product.price)}</p>
+                    </div>
+                    <p className="text-[9px] text-muted-foreground">IVA incluido</p>
+                    <p className={`mt-1 text-[10px] font-semibold ${product.stock ? "text-foreground" : "text-muted-foreground"}`}>{product.stock ? "En existencia" : "Sobre pedido"}</p>
+                  </div>
+                  <div className="px-3 pb-3">
+                    <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart(product.cartItem); }}><ShoppingCart className="size-3.5" /> {product.stock ? "Añadir" : "Cotizar"}</Button>
+                  </div>
                 </article>;
               })}
             </div>

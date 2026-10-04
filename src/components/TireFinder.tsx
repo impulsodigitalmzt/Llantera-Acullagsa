@@ -253,12 +253,28 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                 {shown.map((t) => {
                   const off = Math.round((1 - t.price / t.list) * 100);
                   const detail = toTireDetail(t);
-                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col rounded-xl border border-border bg-card p-2.5 text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
-                    <div className="relative rounded-lg bg-muted/40 p-2"><span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
-                      <div className="flex h-4 items-center justify-center">{BRAND_LOGOS[t.brand] ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-4 max-w-20 object-contain" /> : <span className="text-[11px] font-black italic text-primary">{t.brand}</span>}</div>
-                      <div className="relative mx-auto mt-2 w-32 sm:w-full"><img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" /><Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button></div></div>
-                    <div className="mt-2 flex min-h-[105px] flex-col"><h3 className="text-[11px] font-black uppercase leading-tight">{t.brand} {t.model}</h3><p className="mt-1 text-[10px] font-bold text-muted-foreground">{t.size} · {t.load}</p><p className="mt-1 text-[10px] text-muted-foreground line-through">{money(t.list)}</p><p className="text-lg font-black tracking-tight text-primary">{money(t.price)}</p><p className="text-[9px] text-muted-foreground">IVA incluido</p><p className={`mt-1 text-[10px] font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p></div>
-                    <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart({ id: `tire-${t.brand}-${t.model}-${t.size}`, name: `${t.brand} ${t.model}`, category: "Llanta", detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`, price: t.price, image: tireImg, }); }}><ShoppingCart className="size-3.5" /> {t.stock ? "Añadir" : "Cotizar"}</Button>
+                  return <article key={t.brand + t.model} role="button" tabIndex={0} onClick={() => onOpenProduct(detail, detailProducts)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detail, detailProducts); } }} className="group/card flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-white text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                    <div className="flex min-h-[58px] items-center justify-center border-b border-border bg-white px-3 py-2">
+                      {BRAND_LOGOS[t.brand] ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-8 max-w-[70%] object-contain" /> : <span className="text-[1rem] font-black uppercase tracking-[-0.08em] text-[#0f172a]">{t.brand}</span>}
+                    </div>
+                    <div className="relative bg-[#f6f5f4] p-2">
+                      <span className="absolute left-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
+                      <div className="relative mx-auto w-32 sm:w-full"><img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" /><Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button></div>
+                    </div>
+                    <div className="flex flex-1 flex-col bg-white px-3 pb-3 pt-2 text-left">
+                      <div className="inline-flex w-fit items-center rounded-md bg-[#dff6db] px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#0b7a2d]">1 PIEZA(S)</div>
+                      <h3 className="mt-2 text-[12px] font-black uppercase leading-tight tracking-[-0.04em] text-[#111827]">{t.brand} {t.model}</h3>
+                      <p className="mt-1 text-[10px] font-bold text-muted-foreground">{t.size} · {t.load}</p>
+                      <div className="mt-2">
+                        <p className="text-[10px] text-muted-foreground line-through">{money(t.list)}</p>
+                        <p className="text-[15px] font-black tracking-tight text-[#111827]">{money(t.price)}</p>
+                      </div>
+                      <p className="text-[9px] text-muted-foreground">IVA incluido</p>
+                      <p className={`mt-1 text-[10px] font-semibold ${t.stock ? "text-foreground" : "text-muted-foreground"}`}>{t.stock ? "En existencia" : "Sobre pedido"}</p>
+                    </div>
+                    <div className="px-3 pb-3">
+                      <Button variant="dark" className="mt-auto h-9 w-full text-[10px]" onClick={(event) => { event.stopPropagation(); onAddToCart({ id: `tire-${t.brand}-${t.model}-${t.size}`, name: `${t.brand} ${t.model}`, category: "Llanta", detail: `${t.size} · Índice ${t.load} · ${t.stock ? "En existencia" : "Sobre pedido"}`, price: t.price, image: tireImg, }); }}><ShoppingCart className="size-3.5" /> {t.stock ? "Añadir" : "Cotizar"}</Button>
+                    </div>
                   </article>;
                 })}
               </div>
