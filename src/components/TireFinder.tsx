@@ -261,8 +261,11 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
                       {BRAND_LOGOS[t.brand] ? <img src={BRAND_LOGOS[t.brand]} alt={`Logo ${t.brand}`} className="max-h-7 max-w-[72%] object-contain" /> : <span className="text-[1rem] font-black uppercase tracking-[-0.08em] text-[#0f172a]">{t.brand}</span>}
                     </div>
                     <div className="relative bg-[#f6f5f4] px-2 pb-2 pt-4">
-                      <span className="absolute right-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
-                      <div className="relative mx-auto w-32 sm:w-full"><img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" /><Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button></div>
+                      <div className="relative mx-auto w-32 sm:w-full">
+                        <span className="absolute right-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{off}%</span>
+                        <img src={tireImg} alt={`Llanta ${t.brand} ${t.model} ${t.size}`} width={816} height={816} loading="lazy" className="aspect-square w-full object-contain" />
+                        <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detail); }}><Eye /> Vista rápida</Button>
+                      </div>
                     </div>
                     <div className="flex flex-1 flex-col bg-white px-3 pb-2 pt-1 text-center">
                       <span className={`mx-auto inline-flex items-center justify-center rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] ${stockTone}`}>{stockBadge}</span>

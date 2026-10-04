@@ -241,9 +241,12 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
                     <span className="text-[1rem] font-black uppercase tracking-[-0.08em] text-[#0f172a]">{product.brand}</span>
                   </div>
                   <div className="relative bg-[#f6f5f4] px-2 pb-2 pt-4">
-                    <span className={`absolute left-2 top-2 inline-flex items-center rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] ${stockTone}`}>{stockBadge}</span>
-                    <span className="absolute right-2 top-2 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>
-                    {product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="aspect-square w-full object-contain" /> : <Wrench className="size-20 text-primary" />}<Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button>
+                    <div className="relative">
+                      <span className={`absolute left-2 top-2 z-10 inline-flex items-center rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] ${stockTone}`}>{stockBadge}</span>
+                      <span className="absolute right-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>
+                      {product.gallery[0] ? <img src={product.gallery[0]} alt={product.name} loading="lazy" className="aspect-square w-full object-contain" /> : <Wrench className="size-20 text-primary" />}
+                      <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button>
+                    </div>
                   </div>
                   <div className="flex flex-1 flex-col bg-white px-3 pb-2 pt-1 text-left">
                     <h5 className="text-[12px] font-black uppercase leading-[1.1] tracking-[-0.05em] text-[#111827]">{product.name}</h5>
