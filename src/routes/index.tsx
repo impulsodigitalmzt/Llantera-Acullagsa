@@ -331,92 +331,94 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
     >
       <span id="inicio" className="sr-only">Inicio</span>
 
-      <div
-        ref={tablistRef}
-        role="tablist"
-        aria-label="Categorías de producto"
-        className="sticky top-28 z-30 grid grid-cols-3 overflow-hidden rounded-t-xl border border-b-0 border-border bg-[#f5f5f5] shadow-[0_6px_18px_rgba(15,23,42,0.08)]"
-      >
-        {catalogTabs.map(({ id, label, icon: Icon }) => {
-          const active = tab === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              id={`tab-${id}`}
-              aria-selected={active}
-              aria-controls={`panel-${id}`}
-              onClick={() => selectTab(id)}
-              className={`flex min-h-14 items-center justify-center gap-2 border-r border-border px-2 py-3 text-center text-[11px] font-black uppercase tracking-[0.08em] transition-all duration-200 last:border-r-0 sm:min-h-16 sm:px-4 sm:text-sm ${
-                active
-                  ? "bg-primary text-primary-foreground shadow-[inset_0_-2px_0_rgba(255,255,255,0.3)]"
-                  : "bg-transparent text-foreground/70 hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <Icon className="hidden size-4 sm:block" />
-              <span className="leading-tight">{label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <div className="flex min-h-[560px] flex-col">
+        <div
+          ref={tablistRef}
+          role="tablist"
+          aria-label="Categorías de producto"
+          className="sticky top-28 z-30 mb-6 grid grid-cols-3 overflow-hidden rounded-t-xl border border-border bg-[#f5f5f5] shadow-[0_6px_18px_rgba(15,23,42,0.08)]"
+        >
+          {catalogTabs.map(({ id, label, icon: Icon }) => {
+            const active = tab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`tab-${id}`}
+                aria-selected={active}
+                aria-controls={`panel-${id}`}
+                onClick={() => selectTab(id)}
+                className={`flex min-h-14 items-center justify-center gap-2 border-r border-border px-2 py-3 text-center text-[11px] font-black uppercase tracking-[0.08em] transition-all duration-200 last:border-r-0 sm:min-h-16 sm:px-4 sm:text-sm ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-[inset_0_-2px_0_rgba(255,255,255,0.3)]"
+                    : "bg-transparent text-foreground/70 hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Icon className="hidden size-4 sm:block" />
+                <span className="leading-tight">{label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-      {catalogTabs.map(({ id }) => {
-        const isActive = tab === id;
+        {catalogTabs.map(({ id }) => {
+          const isActive = tab === id;
 
-        if (id === "llantas") {
+          if (id === "llantas") {
+            return (
+              <div
+                key={id}
+                role="tabpanel"
+                id={`panel-${id}`}
+                aria-labelledby={`tab-${id}`}
+                className={isActive ? "block" : "hidden"}
+              >
+                <div className="relative min-h-[420px] rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
+                  <div id="llantas" className="scroll-mt-36">
+                    <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          const title = id === "acumuladores"
+            ? {
+                eyebrow: "Potencia certificada",
+                heading: "Acumuladores LTH®",
+                text: "Una solución para cada vehículo, respaldada por asesoría especializada.",
+                mt: "mt-6",
+              }
+            : {
+                eyebrow: "Suspensión",
+                heading: "Amortiguadores",
+                text: "Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.",
+                mt: "mt-8",
+              };
+
           return (
             <div
               key={id}
               role="tabpanel"
               id={`panel-${id}`}
               aria-labelledby={`tab-${id}`}
-              className={`${isActive ? "block" : "hidden"} scroll-mt-40 pt-8`}
+              className={isActive ? "block" : "hidden"}
             >
-              <div className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
-                <div id="llantas" className="scroll-mt-36">
-                  <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+              <div className="relative min-h-[420px] rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
+                <div id={id} className="scroll-mt-36 border-b border-border pb-6">
+                  <p className="text-xs font-bold uppercase text-primary">{title.eyebrow}</p>
+                  <h2 className="mt-2 text-3xl font-black sm:text-4xl">{title.heading}</h2>
+                  <p className="mt-2 max-w-xl text-sm text-muted-foreground">{title.text}</p>
+                </div>
+                <div className={title.mt}>
+                  <ProductFinder category={id} onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
                 </div>
               </div>
             </div>
           );
-        }
-
-        const title = id === "acumuladores"
-          ? {
-              eyebrow: "Potencia certificada",
-              heading: "Acumuladores LTH®",
-              text: "Una solución para cada vehículo, respaldada por asesoría especializada.",
-              mt: "mt-6",
-            }
-          : {
-              eyebrow: "Suspensión",
-              heading: "Amortiguadores",
-              text: "Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.",
-              mt: "mt-8",
-            };
-
-        return (
-          <div
-            key={id}
-            role="tabpanel"
-            id={`panel-${id}`}
-            aria-labelledby={`tab-${id}`}
-            className={`${isActive ? "block" : "hidden"} scroll-mt-40 pt-8`}
-          >
-            <div className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
-              <div id={id} className="scroll-mt-36 border-b border-border pb-6">
-                <p className="text-xs font-bold uppercase text-primary">{title.eyebrow}</p>
-                <h2 className="mt-2 text-3xl font-black sm:text-4xl">{title.heading}</h2>
-                <p className="mt-2 max-w-xl text-sm text-muted-foreground">{title.text}</p>
-              </div>
-              <div className={title.mt}>
-                <ProductFinder category={id} onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
-              </div>
-            </div>
-          </div>
-        );
-      })}
+        })}
+      </div>
     </section>
   );
 }
