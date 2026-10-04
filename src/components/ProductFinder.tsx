@@ -236,11 +236,11 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
                 const stockBadge = product.stock ? `${Math.max(3, Math.min(20, 3 + (product.price % 17)))} PIEZA(S)` : "SOBRE PEDIDO";
                 const stockTone = product.stock ? "bg-[#dff6db] text-[#0b7a2d]" : "bg-[#fff1c8] text-[#9a6a00]";
                 const detailProduct: ProductDetailProduct = product;
-                return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-white text-center shadow-[0_6px_18px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
-                  <div className="flex min-h-[46px] items-center justify-center border-b border-border bg-white px-3 py-2">
+                return <article key={product.id} role="button" tabIndex={0} onClick={() => onOpenProduct(detailProduct, products)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onOpenProduct(detailProduct, products); } }} className="group/card flex cursor-pointer flex-col overflow-hidden rounded-xl border border-transparent bg-transparent text-center shadow-none transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:bg-white hover:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-0 sm:max-w-none sm:rounded-lg">
+                  <div className="flex min-h-[46px] items-center justify-center border-b border-transparent bg-transparent px-3 py-2 transition-colors duration-200 group-hover/card:border-border">
                     <span className="text-[1rem] font-black uppercase tracking-[-0.08em] text-[#0f172a]">{product.brand}</span>
                   </div>
-                  <div className="relative bg-[#f6f5f4] px-2 pb-2 pt-4">
+                  <div className="relative bg-transparent px-2 pb-2 pt-4">
                     <div className="relative">
                       <span className={`absolute left-2 top-2 z-10 inline-flex items-center rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-[0.14em] ${stockTone}`}>{stockBadge}</span>
                       <span className="absolute right-2 top-2 z-10 rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">-{discount}%</span>
@@ -248,7 +248,7 @@ export function ProductFinder({ category, onAddToCart, onOpenProduct }: {
                       <Button variant="hero" size="sm" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100" onClick={(event) => { event.stopPropagation(); setQuickViewProduct(detailProduct); }}><Eye /> Vista rápida</Button>
                     </div>
                   </div>
-                  <div className="flex flex-1 flex-col bg-white px-3 pb-2 pt-1 text-left">
+                  <div className="flex flex-1 flex-col bg-transparent px-3 pb-2 pt-1 text-left">
                     <h5 className="text-[12px] font-black uppercase leading-[1.1] tracking-[-0.05em] text-[#111827]">{product.name}</h5>
                     <div className="mt-1 flex items-baseline gap-2">
                       <span className="text-[10px] font-bold uppercase text-muted-foreground">{product.detail}</span>
