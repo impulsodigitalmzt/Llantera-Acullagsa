@@ -362,6 +362,8 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
       </div>
 
       {catalogTabs.map(({ id }) => {
+        const isActive = tab === id;
+
         if (id === "llantas") {
           return (
             <div
@@ -369,10 +371,12 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
               role="tabpanel"
               id={`panel-${id}`}
               aria-labelledby={`tab-${id}`}
-              className={`${tab === id ? "block" : "hidden"} scroll-mt-36 pt-6`}
+              className={`${isActive ? "block" : "hidden"} scroll-mt-36 pt-6`}
             >
-              <div id="llantas" className="scroll-mt-36">
-                <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+              <div className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
+                <div id="llantas" className="scroll-mt-36">
+                  <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+                </div>
               </div>
             </div>
           );
@@ -398,7 +402,7 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
             role="tabpanel"
             id={`panel-${id}`}
             aria-labelledby={`tab-${id}`}
-            className={`${tab === id ? "block" : "hidden"} scroll-mt-36 pt-6`}
+            className={`${isActive ? "block" : "hidden"} scroll-mt-36 pt-6`}
           >
             <div className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
               <div id={id} className="scroll-mt-36 border-b border-border pb-6">
