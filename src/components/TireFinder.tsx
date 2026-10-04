@@ -153,11 +153,15 @@ export function TireFinder({ variant = "card", embedded = false, onAddToCart, on
       <div className={`overflow-hidden bg-background shadow-2xl ring-1 ring-border ${embedded ? "rounded-b-md rounded-t-none" : "rounded-md"}`}>
         <div className="grid items-stretch md:grid-cols-[minmax(0,1fr)_240px]">
           <div className="min-w-0 p-4 sm:p-5">
-            {variant === "hero"
-              ? <h1 className="text-xl font-black sm:text-2xl">Busca por medida o por vehículo</h1>
-              : <h2 className="text-xl font-black sm:text-2xl">Encuentra la llanta exacta para tu vehículo</h2>}
-            <p className="mt-1 text-sm text-muted-foreground">{variant === "hero" ? "Captura la medida que trae tu llanta o dinos qué auto tienes y te mostramos las compatibles." : "Busca por la medida que trae tu llanta, o dinos qué auto tienes y te decimos cuál le va."}</p>
-            <div className="mt-4 flex border-b border-border">
+            {!embedded && (
+              <>
+                {variant === "hero"
+                  ? <h1 className="text-xl font-black sm:text-2xl">Busca por medida o por vehículo</h1>
+                  : <h2 className="text-xl font-black sm:text-2xl">Encuentra la llanta exacta para tu vehículo</h2>}
+                <p className="mt-1 text-sm text-muted-foreground">{variant === "hero" ? "Captura la medida que trae tu llanta o dinos qué auto tienes y te mostramos las compatibles." : "Busca por la medida que trae tu llanta, o dinos qué auto tienes y te decimos cuál le va."}</p>
+              </>
+            )}
+            <div className={`flex border-b border-border ${embedded ? "mt-0" : "mt-4"}`}>
               <button type="button" className={tab(mode === "size")} onClick={() => setMode("size")}><Ruler className="size-4" /> Por medida</button>
               <button type="button" className={tab(mode === "vehicle")} onClick={() => setMode("vehicle")}><CarFront className="size-4" /> Por vehículo</button>
             </div>
