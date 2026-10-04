@@ -361,49 +361,58 @@ function CatalogHub({ onAddToCart, onOpenProduct }: {
         })}
       </div>
 
-      {tab === "llantas" && (
-        <div id="llantas" className="scroll-mt-36">
-          <div role="tabpanel" id="panel-llantas" aria-labelledby="tab-llantas" className="scroll-mt-36">
-            <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
-          </div>
-        </div>
-      )}
+      {catalogTabs.map(({ id }) => {
+        if (id === "llantas") {
+          return (
+            <div
+              key={id}
+              role="tabpanel"
+              id={`panel-${id}`}
+              aria-labelledby={`tab-${id}`}
+              className={`${tab === id ? "block" : "hidden"} scroll-mt-36 pt-6`}
+            >
+              <div id="llantas" className="scroll-mt-36">
+                <TireFinder variant="hero" embedded onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+              </div>
+            </div>
+          );
+        }
 
-      {tab === "acumuladores" && (
-        <div
-          role="tabpanel"
-          id="panel-acumuladores"
-          aria-labelledby="tab-acumuladores"
-          className="scroll-mt-36 rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7"
-        >
-          <div id="acumuladores" className="scroll-mt-36 border-b border-border pb-6">
-            <p className="text-xs font-bold uppercase text-primary">Potencia certificada</p>
-            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Acumuladores LTH®</h2>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">Una solución para cada vehículo, respaldada por asesoría especializada.</p>
-          </div>
-          <div className="mt-6">
-            <ProductFinder category="acumuladores" onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
-          </div>
-        </div>
-      )}
+        const title = id === "acumuladores"
+          ? {
+              eyebrow: "Potencia certificada",
+              heading: "Acumuladores LTH®",
+              text: "Una solución para cada vehículo, respaldada por asesoría especializada.",
+              mt: "mt-6",
+            }
+          : {
+              eyebrow: "Suspensión",
+              heading: "Amortiguadores",
+              text: "Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.",
+              mt: "mt-8",
+            };
 
-      {tab === "amortiguadores" && (
-        <div
-          role="tabpanel"
-          id="panel-amortiguadores"
-          aria-labelledby="tab-amortiguadores"
-          className="scroll-mt-36 rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7"
-        >
-          <div id="amortiguadores" className="scroll-mt-36 border-b border-border pb-6">
-            <p className="text-xs font-bold uppercase text-primary">Suspensión</p>
-            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Amortiguadores</h2>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">Recupera la estabilidad y el confort de tu vehículo. Busca por marca, modelo y año.</p>
+        return (
+          <div
+            key={id}
+            role="tabpanel"
+            id={`panel-${id}`}
+            aria-labelledby={`tab-${id}`}
+            className={`${tab === id ? "block" : "hidden"} scroll-mt-36 pt-6`}
+          >
+            <div className="rounded-b-md bg-background p-5 shadow-2xl ring-1 ring-border md:p-7">
+              <div id={id} className="scroll-mt-36 border-b border-border pb-6">
+                <p className="text-xs font-bold uppercase text-primary">{title.eyebrow}</p>
+                <h2 className="mt-2 text-3xl font-black sm:text-4xl">{title.heading}</h2>
+                <p className="mt-2 max-w-xl text-sm text-muted-foreground">{title.text}</p>
+              </div>
+              <div className={title.mt}>
+                <ProductFinder category={id} onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
+              </div>
+            </div>
           </div>
-          <div className="mt-8">
-            <ProductFinder category="amortiguadores" onAddToCart={onAddToCart} onOpenProduct={onOpenProduct} />
-          </div>
-        </div>
-      )}
+        );
+      })}
     </section>
   );
 }
